@@ -3,158 +3,176 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="PS製造プラント Re液（ST/EB混合回収液）グレード切替時タンクレベル動態シミュレーション">
-<title>Re液切替シミュレーション | PS Plant DCS</title>
+<meta name="description" content="PS製造プラント Re液（ST/EB混合回収液）グレード切替・レート変更時タンクレベル動態シミュレーション">
+<title>Re液切替・レート変更シミュレーション | PS Plant DCS</title>
 <style>
 :root{
   --bg:#080b14;--bg1:#0d1120;--bg2:#111527;
   --card:rgba(15,19,38,.96);--brd:rgba(70,96,210,.18);--brdH:rgba(70,96,210,.42);
   --txt:#cdd5f0;--txt2:#7080a0;--txt3:rgba(112,128,160,.4);
   --cyan:#4cc9f0;--blue:#4361ee;--grn:#38a169;--org:#ed8936;
-  --red:#e53e3e;--yel:#f6d365;--purp:#9f7aea;
-  --mono:'Courier New',Courier,monospace;--pW:385px;
+  --red:#e53e3e;--yel:#f6d365;--purp:#9f7aea;--pink:#ed64a6;
+  --mono:'Courier New',Courier,monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--txt);font-family:'Segoe UI','Meiryo UI',system-ui,sans-serif;font-size:12px;display:flex;flex-direction:column}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI','Meiryo UI',system-ui,sans-serif;font-size:22px;display:flex;flex-direction:column}
 input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--brdH);border-radius:4px}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--brdH);border-radius:6px}
+
 /* HEADER */
-#hdr{height:50px;min-height:50px;background:linear-gradient(90deg,#0c0f1e,#101428,#0c0f1e);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:12px;padding:0 18px;box-shadow:0 1px 24px rgba(67,97,238,.18);flex-shrink:0;z-index:10}
-.hlogo{width:32px;height:32px;background:linear-gradient(135deg,var(--cyan),var(--blue));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.htitle h1{font-size:13.5px;font-weight:700;letter-spacing:.3px;line-height:1.2}
+#hdr{height:75px;min-height:75px;background:linear-gradient(90deg,#0c0f1e,#101428,#0c0f1e);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:18px;padding:0 27px;box-shadow:0 1px 24px rgba(67,97,238,.18);flex-shrink:0;z-index:10}
+.hlogo{width:48px;height:48px;background:linear-gradient(135deg,var(--cyan),var(--blue));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}
+.htitle h1{font-size:24px;font-weight:700;letter-spacing:.5px;line-height:1.2}
 .htitle h1 em{color:var(--cyan);font-style:normal}
-.hsub{font-size:9px;color:var(--txt2);letter-spacing:.5px;text-transform:uppercase}
-.hbadges{margin-left:auto;display:flex;gap:6px;align-items:center}
-.pill{padding:2px 9px;border-radius:99px;font-size:9px;font-weight:700;letter-spacing:.4px}
+.hsub{font-size:16px;color:var(--txt2);letter-spacing:.8px;text-transform:uppercase}
+.hbadges{margin-left:auto;display:flex;gap:9px;align-items:center}
+.pill{padding:4px 14px;border-radius:99px;font-size:14px;font-weight:700;letter-spacing:.6px}
 .pb{background:rgba(67,97,238,.12);color:#a5b4fc;border:1px solid rgba(67,97,238,.25)}
 .pg{background:rgba(56,161,105,.12);color:#68d391;border:1px solid rgba(56,161,105,.25)}
 .py{background:rgba(246,211,101,.12);color:var(--yel);border:1px solid rgba(246,211,101,.25)}
+
 /* BODY */
-#body{display:flex;flex:1;overflow:hidden}
+#body{display:flex;flex-direction:column;flex:1;overflow:hidden}
+
 /* INPUT PANEL */
-#inp{width:var(--pW);min-width:var(--pW);background:var(--bg1);border-right:1px solid var(--brd);overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px 8px;flex-shrink:0}
-.fs{background:var(--card);border:1px solid var(--brd);border-radius:9px;overflow:hidden}
-.fsh{border-bottom:1px solid var(--brd);padding:7px 10px;display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.9px}
+#inp{
+  width:100%;background:var(--bg1);border-bottom:1px solid var(--brd);
+  overflow-y:auto;display:flex;flex-wrap:wrap;align-items:flex-start;
+  gap:12px;padding:15px 21px;flex-shrink:0;max-height:50vh;z-index:5;transition:max-height .3s,padding .3s;
+}
+#inp > .fs{flex:1 1 390px}
+
+.fs{background:var(--card);border:1px solid var(--brd);border-radius:14px;overflow:hidden}
+.fsh{border-bottom:1px solid var(--brd);padding:10px 15px;display:flex;align-items:center;gap:9px;font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1.3px}
 .fc .fsh{color:var(--cyan);background:rgba(76,201,240,.04)}
 .fb .fsh{color:#a5b4fc;background:rgba(67,97,238,.04)}
 .fg .fsh{color:var(--grn);background:rgba(56,161,105,.04)}
 .fo .fsh{color:var(--org);background:rgba(237,137,54,.04)}
 .fp .fsh{color:var(--purp);background:rgba(159,122,234,.04)}
-.fsb{padding:9px 10px;display:flex;flex-direction:column;gap:7px}
-.t3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.t3c{display:flex;flex-direction:column;align-items:stretch;gap:3px}
-.t3c label{font-size:10px;font-weight:700;text-align:center}
+.fsb{padding:14px 15px;display:flex;flex-direction:column;gap:10px}
+.t3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.t3c{display:flex;flex-direction:column;align-items:stretch;gap:5px}
+.t3c label{font-size:18px;font-weight:700;text-align:center}
 .la{color:var(--cyan)}.lb{color:var(--grn)}.lc{color:var(--org)}
 .t3c input{text-align:center;width:100%}
-.fr{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px}
-.frl .fn{font-size:11px;color:var(--txt);display:block}
-.frl .fv{font-size:8.5px;font-family:var(--mono);color:var(--txt3);display:block}
-.fri{display:flex;align-items:center;gap:4px}
-input[type=number],select{background:rgba(4,6,13,.78);border:1px solid var(--brdH);color:var(--txt);border-radius:6px;padding:4px 6px;font-family:var(--mono);font-size:12px;outline:none;transition:border-color .15s,box-shadow .15s}
-input[type=number]{width:78px;text-align:right}
-select{width:66px;cursor:pointer;text-align:center}
-input[type=number]:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(76,201,240,.12)}
-.ul{font-size:9px;color:var(--txt2);white-space:nowrap;min-width:28px}
-.kv{display:flex;justify-content:space-between;align-items:center;padding:4px 7px;background:rgba(4,6,13,.55);border:1px solid var(--brd);border-radius:5px}
-.kk{font-size:10px;color:var(--txt2)}
-.kval{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--cyan)}
-/* highlight row for EB_re */
+.fr{display:grid;grid-template-columns:1fr auto;align-items:center;gap:9px}
+.frl .fn{font-size:20px;color:var(--txt);display:block}
+.frl .fv{display:none}
+.fri{display:flex;align-items:center;gap:6px}
+input[type=number],select{background:rgba(4,6,13,.78);border:1px solid var(--brdH);color:var(--txt);border-radius:9px;padding:6px 9px;font-family:var(--mono);font-size:22px;outline:none;transition:border-color .15s,box-shadow .15s}
+input[type=number]{width:115px;text-align:right}
+select{width:100px;cursor:pointer;text-align:center}
+input[type=number]:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(76,201,240,.12)}
+input[type=checkbox]{cursor:pointer;accent-color:var(--cyan)}
+.ul{font-size:16px;color:var(--txt2);white-space:nowrap;min-width:42px}
+.kv{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:rgba(4,6,13,.55);border:1px solid var(--brd);border-radius:8px}
+.kk{font-size:15px;color:var(--txt2)}
+.kval{font-family:var(--mono);font-size:16.5px;font-weight:700;color:var(--cyan)}
 .kv-re{border-color:rgba(76,201,240,.35);background:rgba(76,201,240,.04)}
 .kv-re .kk{color:var(--cyan)}
-/* sep */
-.fsep{height:1px;background:var(--brd);margin:2px 0}
+.fsep{height:1px;background:var(--brd);margin:3px 0}
+
 /* SIM PANEL */
-#sim{flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;gap:8px;padding:8px;min-width:0}
+#sim{flex:1;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;gap:12px;padding:12px;min-width:0}
+
 /* TIME CONTROL */
-#tc{background:var(--card);border:1px solid var(--brd);border-radius:9px;padding:9px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-#bplay{width:36px;height:36px;background:linear-gradient(135deg,var(--cyan),var(--blue));border:none;border-radius:50%;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;flex-shrink:0}
-#bplay:hover{transform:scale(1.1);box-shadow:0 0 18px rgba(76,201,240,.5)}
-#brst{width:28px;height:28px;background:rgba(70,96,210,.1);border:1px solid var(--brdH);border-radius:6px;color:var(--txt2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+#tc{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:14px 21px;display:flex;align-items:center;gap:15px;flex-shrink:0}
+#bplay{width:54px;height:54px;background:linear-gradient(135deg,var(--cyan),var(--blue));border:none;border-radius:50%;color:#fff;font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s;flex-shrink:0}
+#bplay:hover{transform:scale(1.1);box-shadow:0 0 24px rgba(76,201,240,.5)}
+#brst{width:42px;height:42px;background:rgba(70,96,210,.1);border:1px solid var(--brdH);border-radius:9px;color:var(--txt2);font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
 #brst:hover{background:rgba(70,96,210,.25);color:var(--txt)}
-.td{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--cyan);letter-spacing:1px;min-width:84px;line-height:1}
-.td small{font-size:10px;color:var(--txt2);font-weight:400}
-.ptag{padding:3px 10px;border-radius:99px;font-size:9.5px;font-weight:700;letter-spacing:.4px;transition:all .3s;white-space:nowrap;flex-shrink:0}
+.td{font-family:var(--mono);font-size:33px;font-weight:700;color:var(--cyan);letter-spacing:1.5px;min-width:126px;line-height:1}
+.td small{font-size:15px;color:var(--txt2);font-weight:400}
+.ptag{padding:4.5px 15px;border-radius:99px;font-size:14.5px;font-weight:700;letter-spacing:.6px;transition:all .3s;white-space:nowrap;flex-shrink:0}
 .pt1{background:rgba(76,201,240,.1);color:var(--cyan);border:1px solid rgba(76,201,240,.25)}
 .pt2{background:rgba(237,137,54,.1);color:var(--org);border:1px solid rgba(237,137,54,.25)}
 .pt3{background:rgba(56,161,105,.1);color:var(--grn);border:1px solid rgba(56,161,105,.25)}
-.sc{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
-.sm{display:flex;justify-content:space-between;font-size:8.5px;color:var(--txt3);padding:0 1px}
-input[type=range]{width:100%;height:5px;-webkit-appearance:none;appearance:none;background:rgba(70,96,210,.2);border-radius:3px;cursor:pointer;outline:none}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));box-shadow:0 0 8px rgba(76,201,240,.5);cursor:pointer;transition:transform .1s}
+.sc{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.sm{display:flex;justify-content:space-between;font-size:13px;color:var(--txt3);padding:0 2px}
+input[type=range]{width:100%;height:8px;-webkit-appearance:none;appearance:none;background:rgba(70,96,210,.2);border-radius:4px;cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));box-shadow:0 0 12px rgba(76,201,240,.5);cursor:pointer;transition:transform .1s}
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+
 /* TANK ROW */
-#tkrow{display:flex;gap:8px;flex-shrink:0}
-.tcard{flex:1;background:var(--card);border:1px solid var(--brd);border-radius:9px;padding:9px 8px;display:flex;flex-direction:column;align-items:center;gap:5px}
-.tname{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
-.farr{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;transition:color .25s,text-shadow .25s,background .25s;color:var(--txt3);width:100%;text-align:center;background:rgba(4,6,13,.3)}
-.fion{color:#68d391!important;text-shadow:0 0 8px rgba(104,211,145,.7);background:rgba(56,161,105,.1)!important}
-.foon{color:var(--org)!important;text-shadow:0 0 8px rgba(237,137,54,.7);background:rgba(237,137,54,.1)!important}
-.tbw{position:relative;width:68px;height:128px}
-.tsh{width:100%;height:100%;background:rgba(4,6,15,.8);border:2px solid rgba(70,96,210,.35);border-radius:4px 4px 9px 9px;position:relative;overflow:hidden}
-.tfill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(76,201,240,.82) 0%,rgba(67,97,238,.72) 100%);transition:height .22s cubic-bezier(.4,0,.2,1);border-radius:0 0 7px 7px}
+#tkrow{display:flex;gap:12px;flex-shrink:0}
+.tcard{flex:1;background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.tname{font-size:15px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.farr{font-size:15px;font-weight:700;padding:3px 10px;border-radius:6px;transition:color .25s,text-shadow .25s,background .25s;color:var(--txt3);width:100%;text-align:center;background:rgba(4,6,13,.3)}
+.fion{color:#68d391!important;text-shadow:0 0 12px rgba(104,211,145,.7);background:rgba(56,161,105,.1)!important}
+.foon{color:var(--org)!important;text-shadow:0 0 12px rgba(237,137,54,.7);background:rgba(237,137,54,.1)!important}
+.fadd{color:var(--yel)!important;text-shadow:0 0 12px rgba(246,211,101,.7);background:rgba(246,211,101,.1)!important}
+.tbw{position:relative;width:102px;height:192px}
+.tsh{width:100%;height:100%;background:rgba(4,6,15,.8);border:3px solid rgba(70,96,210,.35);border-radius:6px 6px 14px 14px;position:relative;overflow:hidden}
+.tfill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(180deg,rgba(76,201,240,.82) 0%,rgba(67,97,238,.72) 100%);transition:height .22s cubic-bezier(.4,0,.2,1);border-radius:0 0 10px 10px}
 .tfill.fdup{background:linear-gradient(180deg,rgba(252,129,129,.9),rgba(229,62,62,.82))!important}
 .tfill.fovf{background:linear-gradient(180deg,rgba(246,173,85,.95),rgba(237,137,54,.85))!important}
-.rpl{position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:rip 3s infinite linear}
+.rpl{position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);animation:rip 3s infinite linear}
 @keyframes rip{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-.tmk{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.1);z-index:3}
-.tml{position:absolute;right:2px;font-size:6.5px;color:rgba(255,255,255,.25);font-family:var(--mono);transform:translateY(50%);z-index:4;line-height:1}
-.tofline{position:absolute;top:0;left:0;right:0;height:2px;background:repeating-linear-gradient(90deg,var(--org) 0,var(--org) 4px,transparent 4px,transparent 8px);opacity:.65;z-index:5}
+.tmk{position:absolute;left:0;right:0;height:2px;background:rgba(255,255,255,.1);z-index:3}
+.tml{position:absolute;right:3px;font-size:10px;color:rgba(255,255,255,.25);font-family:var(--mono);transform:translateY(50%);z-index:4;line-height:1}
+.tofline{position:absolute;top:0;left:0;right:0;height:3px;background:repeating-linear-gradient(90deg,var(--org) 0,var(--org) 6px,transparent 6px,transparent 12px);opacity:.65;z-index:5}
 .tvol{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;text-align:center;pointer-events:none}
-.tvoln{font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.9);display:block;line-height:1.1}
-.tvolu{font-size:8px;color:rgba(255,255,255,.6);display:block}
-.frate{font-family:var(--mono);font-size:9px;color:var(--txt2);text-align:center;line-height:1.7;width:100%}
+.tvoln{font-family:var(--mono);font-size:21px;font-weight:700;color:#fff;text-shadow:0 1px 9px rgba(0,0,0,.9);display:block;line-height:1.1}
+.tvolu{font-size:12px;color:rgba(255,255,255,.6);display:block}
+.frate{font-family:var(--mono);font-size:13.5px;color:var(--txt2);text-align:center;line-height:1.7;width:100%}
 .fiv{color:#68d391}.fov{color:var(--org)}
-.stag{padding:2px 8px;border-radius:5px;font-size:9px;font-weight:700;letter-spacing:.3px;text-align:center;white-space:nowrap;transition:all .3s;min-width:72px}
+.stag{padding:3px 12px;border-radius:8px;font-size:13.5px;font-weight:700;letter-spacing:.5px;text-align:center;white-space:nowrap;transition:all .3s;min-width:108px}
 .si{background:#e2e8f0;color:#4a5568}
 .sd{background:#fed7d7;color:#742a2a;animation:bred .9s infinite}
 .sv{background:#fed7d7;color:#742a2a;animation:bred .9s infinite}
 .sb{background:#bee3f8;color:#2a4365}
 .sn{background:#c6f6d5;color:#22543d;animation:bgrn 1.5s infinite}
 .so{background:#feebc8;color:#744210}
-@keyframes bred{0%,100%{box-shadow:none}50%{box-shadow:0 0 8px rgba(229,62,62,.6)}}
+@keyframes bred{0%,100%{box-shadow:none}50%{box-shadow:0 0 12px rgba(229,62,62,.6)}}
 @keyframes bgrn{0%,100%{opacity:1}50%{opacity:.6}}
+
 /* HOLDUP */
-#hd{background:var(--card);border:1px solid var(--brd);border-radius:9px;padding:10px 14px;flex-shrink:0}
-.hdtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
-.hdtit{font-size:9px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.7px}
-.hdinf{font-size:9px;color:var(--txt3)}
-.hdbr{height:24px;border-radius:7px;overflow:hidden;display:flex;border:1px solid var(--brd);margin-bottom:7px}
-.hdeb{background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(0,0,0,.7);transition:width .3s cubic-bezier(.4,0,.2,1);overflow:hidden;white-space:nowrap}
-.hdst{flex:1;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.8);overflow:hidden;white-space:nowrap}
-.hdst2{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.hds{background:rgba(4,6,13,.55);border:1px solid var(--brd);border-radius:6px;padding:5px 7px}
-.hdsk{font-size:8.5px;color:var(--txt2);margin-bottom:2px}
-.hdsv{font-family:var(--mono);font-size:12px;font-weight:700}
+#hd{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:15px 21px;flex-shrink:0}
+.hdtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.hdtit{font-size:14px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px}
+.hdinf{font-size:14px;color:var(--txt3)}
+.hdbr{height:36px;border-radius:10px;overflow:hidden;display:flex;border:1px solid var(--brd);margin-bottom:10px}
+.hdeb{background:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:rgba(0,0,0,.7);transition:width .3s cubic-bezier(.4,0,.2,1);overflow:hidden;white-space:nowrap}
+.hdst{flex:1;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:rgba(255,255,255,.8);overflow:hidden;white-space:nowrap}
+.hdst2{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.hds{background:rgba(4,6,13,.55);border:1px solid var(--brd);border-radius:9px;padding:8px 10px}
+.hdsk{font-size:13px;color:var(--txt2);margin-bottom:3px}
+.hdsv{font-family:var(--mono);font-size:18px;font-weight:700}
 .heb{color:var(--cyan)}.hst{color:#818cf8}.htot{color:var(--txt)}.hph{color:var(--yel)}
+
 /* TREND */
-#trp{background:var(--card);border:1px solid var(--brd);border-radius:9px;padding:10px 14px;flex-shrink:0}
-.trtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.trtit{font-size:9px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:.7px}
-.trleg{display:flex;gap:12px}
-.tleg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--txt2)}
-.tlegl{width:16px;height:2px;border-radius:1px}
-#tsvg{display:block;width:100%;overflow:visible}
+#trp{background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:15px 21px;flex-shrink:0}
+.trtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.trtit{font-size:14px;font-weight:700;color:var(--txt2);text-transform:uppercase;letter-spacing:1px}
+.trleg{display:flex;gap:18px;flex-wrap:wrap}
+.tleg{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--txt2)}
+.tlegl{width:24px;height:3px;border-radius:1.5px}
+#tsvg{display:block;width:100%;overflow:visible;height:250px}
+
 /* LOG */
-#logp{background:#050610;border:1px solid rgba(70,96,210,.1);border-radius:9px;display:flex;flex-direction:column;min-height:100px;flex-shrink:0}
-.loghdr{background:rgba(10,13,26,.9);border-bottom:1px solid rgba(70,96,210,.1);padding:6px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0;border-radius:9px 9px 0 0}
-.ldot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:ldot 1.5s infinite}
-@keyframes ldot{0%,100%{opacity:1;box-shadow:0 0 4px var(--grn)}50%{opacity:.25;box-shadow:none}}
-.ltit{font-size:9px;font-weight:700;color:var(--grn);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
-#logbody{overflow-y:auto;padding:8px 12px;max-height:145px;font-family:var(--mono);font-size:10.5px;line-height:1.8}
-.le{display:flex;gap:8px}
-.let{color:var(--cyan);min-width:62px;flex-shrink:0}
+#logp{background:#050610;border:1px solid rgba(70,96,210,.1);border-radius:14px;display:flex;flex-direction:column;min-height:150px;flex-shrink:0}
+.loghdr{background:rgba(10,13,26,.9);border-bottom:1px solid rgba(70,96,210,.1);padding:9px 18px;display:flex;align-items:center;gap:10px;flex-shrink:0;border-radius:14px 14px 0 0}
+.ldot{width:9px;height:9px;border-radius:50%;background:var(--grn);animation:ldot 1.5s infinite}
+@keyframes ldot{0%,100%{opacity:1;box-shadow:0 0 6px var(--grn)}50%{opacity:.25;box-shadow:none}}
+.ltit{font-size:14px;font-weight:700;color:var(--grn);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
+#logbody{overflow-y:auto;padding:12px 18px;max-height:220px;font-family:var(--mono);font-size:16px;line-height:1.8}
+.le{display:flex;gap:12px}
+.let{color:var(--cyan);min-width:93px;flex-shrink:0}
 .lem{flex:1}
-.linfo{color:#708098}.lhi{color:var(--yel)}.lwarn{color:var(--org)}.lerr{color:#fc8181}.lok{color:var(--grn)}
+.linfo{color:#708098}.lhi{color:var(--yel)}.lwarn{color:var(--org)}.lerr{color:#fc8181}.lok{color:var(--grn)}.lout{color:var(--pink)}
+
+/* TOAST ALERT */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--red);color:#fff;padding:12px 24px;border-radius:8px;font-weight:bold;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity 0.3s;}
+#toast.show{opacity:1;}
 </style>
 </head>
 <body>
-<!-- HEADER -->
 <header id="hdr">
   <div class="hlogo">🏭</div>
   <div class="htitle">
     <h1><em>Re液</em>切替運用シミュレーションシステム</h1>
-    <div class="hsub">PS Plant · ST/EB Mixed-Recovery Grade-Switch Dynamic Simulator · v1.1</div>
+    <div class="hsub">PS Plant · ST/EB Mixed-Recovery Grade-Switch Dynamic Simulator · v2.4</div>
   </div>
   <div class="hbadges">
     <span class="pill pb">STANDALONE</span>
@@ -163,405 +181,564 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
   </div>
 </header>
 
-<div id="body">
-<!-- LEFT: Input Panel -->
-<aside id="inp">
+<div id="toast">⚠ 精留警告: タンクが枯渇したため、仕込みを停止しました。</div>
 
-  <!-- タンク初期残量 -->
-  <div class="fs fc">
-    <div class="fsh">🗄 タンク初期残量</div>
-    <div class="fsb">
-      <div class="t3">
-        <div class="t3c"><label class="la">Tank A</label><input type="number" id="initA" value="25.0" min="0" max="30" step="0.1"><span style="font-size:8.5px;color:var(--txt2);text-align:center">m³</span></div>
-        <div class="t3c"><label class="lb">Tank B</label><input type="number" id="initB" value="5.0" min="0" max="30" step="0.1"><span style="font-size:8.5px;color:var(--txt2);text-align:center">m³</span></div>
-        <div class="t3c"><label class="lc">Tank C</label><input type="number" id="initC" value="0.0" min="0" max="30" step="0.1"><span style="font-size:8.5px;color:var(--txt2);text-align:center">m³</span></div>
+<div id="body">
+<section id="inp">
+
+  <!-- モードスイッチ -->
+  <div class="fs" style="flex:1 1 100%;background:rgba(76,201,240,.06);border-color:var(--cyan)">
+    <div class="fsh" style="color:var(--cyan);padding:12px 15px;">
+      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;width:100%">
+        <input type="checkbox" id="modeRate" style="width:24px;height:24px;">
+        <span style="font-size:16px;font-weight:700;">レート変更（同一タンク継続）モード</span>
+      </label>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:12px; flex:1 1 390px;">
+    <!-- タンクレベル設定 -->
+    <div class="fs fc">
+      <div class="fsh">🗄 タンクレベル設定</div>
+      <div class="fsb">
+        <div class="t3">
+          <div class="t3c"><label class="la">Tank A</label><input type="number" id="initA" value="25.0" min="0" max="30" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
+          <div class="t3c"><label class="lb">Tank B</label><input type="number" id="initB" value="5.0"  min="0" max="30" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
+          <div class="t3c"><label class="lc">Tank C</label><input type="number" id="initC" value="0.0"  min="0" max="30" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 各設定値 -->
+    <div class="fs fp">
+      <div class="fsh">🔒 各設定値</div>
+      <div class="fsb">
+        <div class="t3" style="grid-template-columns:repeat(4,1fr)">
+          <div class="t3c"><label>Re液比重</label><input type="number" id="cDensity" value="0.89" min="0.1" max="2.0" step="0.01"></div>
+          <div class="t3c"><label>中添量</label><input type="number" id="cAdd" value="175" min="0" max="5000" step="5"><span style="font-size:13px;color:var(--txt2);text-align:center">kg/hr</span></div>
+          <div class="t3c"><label>タンクレベルHi</label><input type="number" id="cVmax" value="30.0" min="1" max="100" step="1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
+          <div class="t3c"><label>反応器保有量</label><input type="number" id="cVhold" value="100.0" min="1" max="500" step="1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
+        </div>
+        <div class="fsep"></div>
+        <div class="fr">
+          <div class="frl"><span class="fn">シミュレーション開始時刻</span></div>
+          <div class="fri"><input type="time" id="baseTime" value="00:00" style="font-family:var(--mono);font-size:22px;padding:4px 8px;background:rgba(4,6,13,.78);border:1px solid var(--brdH);border-radius:9px;color:var(--txt);outline:none;width:130px"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 現グレード -->
+  <!-- 現グレード条件 Grade 1 -->
   <div class="fs fb">
     <div class="fsh">📋 現グレード条件（Grade 1）</div>
     <div class="fsb">
       <div class="fr">
-        <div class="frl"><span class="fn">トータルフィード流量 F₁</span><span class="fv">feedF1</span></div>
-        <div class="fri"><input type="number" id="feedF1" value="10000" min="0" max="200000" step="100"><span class="ul">kg/hr</span></div>
+        <div class="frl"><span class="fn">生産量 P₁</span><span class="fv">prod1</span></div>
+        <div class="fri"><input type="number" id="prod1" value="150" min="0" max="1000" step="1"><span class="ul">T/D</span></div>
       </div>
       <div class="fr">
-        <div class="frl"><span class="fn">目標EB濃度 EB₁（フィード中）</span><span class="fv">eb1</span></div>
-        <div class="fri"><input type="number" id="eb1" value="40.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">Solid％ RX₁</span><span class="fv">rx1</span></div>
+        <div class="fri"><input type="number" id="rx1" value="50.0" min="0.1" max="99.9" step="0.1"><span class="ul">%</span></div>
       </div>
       <div class="fr">
-        <div class="frl"><span class="fn">ST反応率 RX₁</span><span class="fv">rx1</span></div>
-        <div class="fri"><input type="number" id="rx1" value="60.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">フィード量 F₁</span><span class="fv">calcF1（自動）</span></div>
+        <div class="fri"><span id="calcF1" style="font-family:var(--mono);font-size:18px;color:var(--cyan);font-weight:700;width:115px;text-align:right;display:inline-block;padding-right:8px;">---</span><span class="ul">kg/hr</span></div>
       </div>
       <div class="fsep"></div>
       <div class="fr">
-        <div class="frl"><span class="fn" style="color:var(--cyan)">現Re液中EB濃度 EB_re₁</span><span class="fv">ebRe1</span></div>
-        <div class="fri"><input type="number" id="ebRe1" value="62.5" min="0.1" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">フィードEB％ EB₁</span><span class="fv">eb1（フィード中）</span></div>
+        <div class="fri"><input type="number" id="eb1" value="35.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
       </div>
-      <div class="kv"><span class="kk">プロセス回収率 Rrec₁ <span style="font-size:8px;color:var(--txt3)">(EB全量+未反応ST)</span></span><span class="kval" id="rr1">—</span></div>
+      <div class="fr">
+        <div class="frl"><span class="fn" style="color:var(--cyan)">現Re中EB％ EB_re₁</span><span class="fv">ebRe1</span></div>
+        <div class="fri"><input type="number" id="ebRe1" value="70.0" min="0.1" max="100" step="0.1"><span class="ul">%</span></div>
+      </div>
+      <div class="kv"><span class="kk">プロセス回収率 Rrec₁ (=1−RX₁/100)</span><span class="kval" id="rr1">—</span></div>
       <div class="kv"><span class="kk">プロセス→タンク Fᵢₙ₁</span><span class="kval" id="fi1">—</span></div>
-      <div class="kv kv-re"><span class="kk">タンク→プロセス Fout₁ <span style="font-size:8px;color:var(--txt3)">(Re液払出)</span></span><span class="kval" id="fo1">—</span></div>
-      <div class="kv"><span class="kk">Re液使用率 EB_feed/EB_re₁</span><span class="kval" id="ur1">—</span></div>
+      <div class="kv kv-re"><span class="kk">タンク→プロセス Fout₁ (Re液払出)</span><span class="kval" id="fo1">—</span></div>
     </div>
   </div>
 
-  <!-- 次グレード -->
+  <!-- 次グレード / Rate 2 -->
   <div class="fs fg">
-    <div class="fsh">🔄 次グレード条件（Grade 2）</div>
+    <div class="fsh" id="titleG2">🔄 次グレード条件（Grade 2）</div>
     <div class="fsb">
       <div class="fr">
-        <div class="frl"><span class="fn">トータルフィード流量 F₂</span><span class="fv">feedF2</span></div>
-        <div class="fri"><input type="number" id="feedF2" value="12000" min="0" max="200000" step="100"><span class="ul">kg/hr</span></div>
+        <div class="frl"><span class="fn">生産量 P₂</span><span class="fv">prod2</span></div>
+        <div class="fri"><input type="number" id="prod2" value="180" min="0" max="1000" step="1"><span class="ul">T/D</span></div>
       </div>
       <div class="fr">
-        <div class="frl"><span class="fn">目標EB濃度 EB₂（フィード中）</span><span class="fv">eb2</span></div>
-        <div class="fri"><input type="number" id="eb2" value="50.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">Solid％ RX₂</span><span class="fv">rx2</span></div>
+        <div class="fri"><input type="number" id="rx2" value="55.0" min="0.1" max="99.9" step="0.1"><span class="ul">%</span></div>
       </div>
       <div class="fr">
-        <div class="frl"><span class="fn">ST反応率 RX₂</span><span class="fv">rx2</span></div>
-        <div class="fri"><input type="number" id="rx2" value="55.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">フィード量 F₂</span><span class="fv">calcF2（自動）</span></div>
+        <div class="fri"><span id="calcF2" style="font-family:var(--mono);font-size:18px;color:var(--cyan);font-weight:700;width:115px;text-align:right;display:inline-block;padding-right:8px;">---</span><span class="ul">kg/hr</span></div>
       </div>
       <div class="fsep"></div>
       <div class="fr">
-        <div class="frl"><span class="fn" style="color:var(--grn)">次Re液中EB濃度 EB_re₂</span><span class="fv">ebRe2</span></div>
-        <div class="fri"><input type="number" id="ebRe2" value="69.0" min="0.1" max="100" step="0.1"><span class="ul">%</span></div>
+        <div class="frl"><span class="fn">フィードEB％ EB₂</span><span class="fv">eb2（フィード中）</span></div>
+        <div class="fri"><input type="number" id="eb2" value="40.0" min="0" max="100" step="0.1"><span class="ul">%</span></div>
       </div>
-      <div class="kv"><span class="kk">プロセス回収率 Rrec₂ <span style="font-size:8px;color:var(--txt3)">(EB全量+未反応ST)</span></span><span class="kval" id="rr2">—</span></div>
+      <div class="fr">
+        <div class="frl"><span class="fn" style="color:var(--grn)">次Re中EB％ EB_re₂</span><span class="fv">ebRe2</span></div>
+        <div class="fri"><input type="number" id="ebRe2" value="88.9" min="0.1" max="100" step="0.1"><span class="ul">%</span></div>
+      </div>
+      <div class="kv"><span class="kk">プロセス回収率 Rrec₂ (=1−RX₂/100)</span><span class="kval" id="rr2">—</span></div>
       <div class="kv"><span class="kk">プロセス→タンク Fᵢₙ₂</span><span class="kval" id="fi2">—</span></div>
-      <div class="kv kv-re"><span class="kk">タンク→プロセス Fout₂ <span style="font-size:8px;color:var(--txt3)">(Re液払出)</span></span><span class="kval" id="fo2">—</span></div>
-      <div class="kv"><span class="kk">Re液使用率 EB_feed/EB_re₂</span><span class="kval" id="ur2">—</span></div>
+      <div class="kv kv-re"><span class="kk">タンク→プロセス Fout₂ (Re液払出)</span><span class="kval" id="fo2">—</span></div>
     </div>
   </div>
 
-  <!-- 切替設定 -->
+  <!-- 切替シーケンス -->
   <div class="fs fo">
-    <div class="fsh">⚙ 切替シーケンス設定</div>
+    <div class="fsh">⚙ 運用・切替シーケンス設定</div>
     <div class="fsb">
-      <div class="fr"><div class="frl"><span class="fn">回収タンク切替時間</span><span class="fv">tSw</span></div><div class="fri"><input type="number" id="tSw" value="2.0" min="0" max="12" step="0.1"><span class="ul">h後</span></div></div>
-      <div class="fr"><div class="frl"><span class="fn">旧グレードタンク</span><span class="fv">tkOld</span></div><div class="fri"><select id="tkOld"><option value="A" selected>A</option><option value="B">B</option><option value="C">C</option></select><span class="ul"></span></div></div>
-      <div class="fr"><div class="frl"><span class="fn">新グレードタンク</span><span class="fv">tkNew</span></div><div class="fri"><select id="tkNew"><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select><span class="ul"></span></div></div>
+      <div class="fr">
+        <div class="frl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="enFeedStop" checked style="width:24px;height:24px"><span class="fn" id="lblTstop">Re液フィード停止時間</span></label></div>
+        <div class="fri"><input type="number" id="tStop" value="2.0" min="0" max="24" step="0.1"><span class="ul">h後</span></div>
+      </div>
+      <div class="fr" style="background:rgba(255,255,255,.03);padding:6px;border-radius:6px;">
+        <div class="frl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="enTsw" checked style="width:24px;height:24px"><span class="fn" id="lblTsw">FC切替時間</span></label></div>
+        <div class="fri"><input type="number" id="tSw" value="2.0" readonly style="border-color:rgba(255,255,255,.2);background:rgba(255,255,255,0.05);color:var(--txt)"><span class="ul">h後</span></div>
+      </div>
+      <div class="fr" style="background:rgba(246,211,101,.05);padding:6px;border-radius:6px;border:1px solid rgba(246,211,101,.2)">
+        <div class="frl"><span class="fn" style="color:var(--yel)">レート変更後Reタンク置換時間</span></div>
+        <div class="fri"><input type="number" id="tTrans" value="2.0" readonly style="border-color:rgba(246,211,101,.4);background:rgba(255,255,255,0.05);color:var(--yel)"><span class="ul">h</span></div>
+      </div>
+      <div class="fr">
+        <div class="frl"><span class="fn" id="lblTkOld">使用中タンク</span><span class="fv">tkOld</span></div>
+        <div class="fri"><select id="tkOld"><option value="A" selected>A</option><option value="B">B</option><option value="C">C</option></select></div>
+      </div>
+      <div class="fr" id="rowTkNew">
+        <div class="frl"><span class="fn">切替後タンク</span><span class="fv">tkNew</span></div>
+        <div class="fri"><select id="tkNew"><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select></div>
+      </div>
+      <!-- 任意タンク切替 -->
+      <div style="padding:12px;background:rgba(255,255,255,.03);border-radius:9px;margin-top:4px;border:1px dashed rgba(255,255,255,.15);display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:13px;color:var(--txt2);font-weight:bold;">■ 任意タンク切替（オーバーライド）</div>
+        <div>
+          <label style="display:flex;align-items:center;gap:9px;font-size:15px;color:var(--cyan);font-weight:700;margin-bottom:8px;cursor:pointer">
+            <input type="checkbox" id="enTkSw" style="width:20px;height:20px"> FC受入タンク変更
+          </label>
+          <div class="fr">
+            <div class="frl"><span class="fn">IN変更実施時間</span></div>
+            <div class="fri"><input type="number" id="tTkSw" value="12.0" min="0" max="24" step="0.1" disabled><span class="ul">h後</span></div>
+          </div>
+          <div class="fr" style="margin-top:6px">
+            <div class="frl"><span class="fn">切替後受入タンク</span></div>
+            <div class="fri"><select id="tkNextIn" disabled><option value="A">A</option><option value="B">B</option><option value="C" selected>C</option></select></div>
+          </div>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.1)"></div>
+        <div>
+          <label style="display:flex;align-items:center;gap:9px;font-size:15px;color:var(--pink);font-weight:700;margin-bottom:8px;cursor:pointer">
+            <input type="checkbox" id="enFoutSw" style="width:20px;height:20px"> 払出タンク変更
+          </label>
+          <div class="fr">
+            <div class="frl"><span class="fn">OUT変更実施時間</span></div>
+            <div class="fri"><input type="number" id="tFoutSw" value="16.0" min="0" max="24" step="0.1" disabled><span class="ul">h後</span></div>
+          </div>
+          <div class="fr" style="margin-top:6px">
+            <div class="frl"><span class="fn">切替後払出タンク</span></div>
+            <div class="fri"><select id="tkNextFout" disabled><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- 固定定数 -->
-  <div class="fs fp">
-    <div class="fsh">🔒 システム固定定数</div>
+  <!-- 精留プロセス -->
+  <div class="fs" style="border-color:rgba(237,100,166,.3)">
+    <div class="fsh" style="color:var(--pink);background:rgba(237,100,166,.04)">⚗ 精留プロセス（Distillation）</div>
     <div class="fsb">
-      <div class="kv"><span class="kk">V_max（タンク最大容量）</span><span class="kval">30.0 m³</span></div>
-      <div class="kv"><span class="kk">V_hold（系内ホールドアップ）</span><span class="kval">100.0 m³</span></div>
-      <div class="kv"><span class="kk">Re液比重（密度）</span><span class="kval">0.89（890 kg/m³）</span></div>
-      <div class="kv"><span class="kk">計算ステップ Δt</span><span class="kval">0.02 h</span></div>
-      <div class="kv"><span class="kk">シミュレーション終端</span><span class="kval">12.0 h / 601 steps</span></div>
+      <label style="display:flex;align-items:center;gap:12px;cursor:pointer;width:100%;padding-bottom:6px">
+        <input type="checkbox" id="enDist" style="width:20px;height:20px">
+        <span style="font-size:15px;font-weight:700;color:var(--txt)">精留プロセスを有効にする</span>
+      </label>
+      <div class="fsep"></div>
+      <div class="fr">
+        <div class="frl"><span class="fn">精留開始時間</span><span class="fv">tDistStart</span></div>
+        <div class="fri"><input type="number" id="tDistStart" value="0.0" min="0" max="24" step="0.1" disabled><span class="ul">h後</span></div>
+      </div>
+      <div class="fr">
+        <div class="frl"><span class="fn">仕込元タンク</span><span class="fv">tkDistIn</span></div>
+        <div class="fri"><select id="tkDistIn" disabled><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select></div>
+      </div>
+      <div class="fr">
+        <div class="frl"><span class="fn">精留仕込量 (抽出)</span><span class="fv">fDistIn</span></div>
+        <div class="fri"><input type="number" id="fDistIn" value="2000" min="0" max="10000" step="10" disabled><span class="ul">kg/hr</span></div>
+      </div>
+      <div class="fsep"></div>
+      <div class="fr">
+        <div class="frl"><span class="fn">受入先タンク</span><span class="fv">tkDistOut</span></div>
+        <div class="fri"><select id="tkDistOut" disabled><option value="A">A</option><option value="B" selected>B</option><option value="C">C</option></select></div>
+      </div>
+      <div class="fr">
+        <div class="frl"><span class="fn">精留払出量 (生産)</span><span class="fv">fDistOut</span></div>
+        <div class="fri"><input type="number" id="fDistOut" value="1500" min="0" max="10000" step="10" disabled><span class="ul">kg/hr</span></div>
+      </div>
     </div>
   </div>
 
-</aside>
 
-<!-- RIGHT: Sim Panel -->
+
+</section>
+
 <main id="sim">
-
   <!-- Time Control -->
   <div id="tc">
     <button id="bplay" title="再生/停止">▶</button>
-    <button id="brst" title="リセット">↺</button>
+    <button id="brst"  title="リセット">↺</button>
     <div class="td" id="tdisp">0.00<small> h</small></div>
     <span class="ptag pt1" id="pdisp">Phase 1: 現グレード循環</span>
     <div class="sc">
-      <input type="range" id="tslider" min="0" max="600" step="1" value="0">
-      <div class="sm"><span>0h</span><span>2h</span><span>4h</span><span>6h</span><span>8h</span><span>10h</span><span>12h</span></div>
+      <input type="range" id="tslider" min="0" max="1200" step="1" value="0">
+      <div class="sm"><span>0h</span><span>4h</span><span>8h</span><span>12h</span><span>16h</span><span>20h</span><span>24h</span></div>
     </div>
+    <label style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--cyan);cursor:pointer;background:rgba(76,201,240,.08);padding:8px 12px;border-radius:8px;border:1px solid rgba(76,201,240,.3);flex-shrink:0;font-weight:bold;">
+      <input type="checkbox" id="toggleMaximize" style="width:20px;height:20px;">
+      <span id="toggleMaximizeText">⬆ 入力を隠して最大化</span>
+    </label>
   </div>
 
-  <!-- Tank Indicators -->
-  <div id="tkrow">
-    <div class="tcard">
-      <div class="tname" style="color:var(--cyan)">● TANK-A</div>
-      <div class="farr" id="inA">▼ IN</div>
-      <div class="tbw"><div class="tsh">
-        <div class="tofline"></div>
-        <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
-        <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
-        <div class="tfill" id="fillA" style="height:83.33%"><div class="rpl"></div></div>
-        <div class="tvol"><span class="tvoln" id="volA">25.00</span><span class="tvolu">m³</span></div>
-      </div></div>
-      <div class="farr" id="outA">▼ OUT</div>
-      <div class="frate">
-        IN:<span class="fiv" id="finvA">0.00</span>｜OUT:<span class="fov" id="foutvA">0.00</span><br>
-        <span style="font-size:8px;color:var(--txt3)">m³/h</span>
+  <div style="display:flex;flex-direction:column;gap:12px;min-width:0;">
+    <!-- Tanks -->
+    <div id="tkrow">
+      <div class="tcard">
+        <div class="tname" style="color:var(--cyan)">● TANK-A <span class="dbdg" id="dbdgA" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="farr" id="inA">▼ IN</div>
+        <div class="tbw"><div class="tsh">
+          <div class="tofline"></div>
+          <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
+          <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
+          <div class="tfill" id="fillA" style="height:83.33%"><div class="rpl"></div></div>
+          <div class="tvol"><span class="tvoln" id="volA">25.00</span><span class="tvolu">m³</span></div>
+        </div></div>
+        <div class="farr" id="outA">▼ OUT</div>
+        <div class="frate">IN:<span class="fiv" id="finvA">0.000</span>｜OUT:<span class="fov" id="foutvA">0.000</span><br><span style="font-size:12px;color:var(--txt3)">m³/h</span></div>
+        <div class="stag si" id="stagA">待機</div>
       </div>
-      <div class="stag si" id="stagA">待機</div>
-    </div>
-    <div class="tcard">
-      <div class="tname" style="color:var(--grn)">● TANK-B</div>
-      <div class="farr" id="inB">▼ IN</div>
-      <div class="tbw"><div class="tsh">
-        <div class="tofline"></div>
-        <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
-        <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
-        <div class="tfill" id="fillB" style="height:16.67%"><div class="rpl"></div></div>
-        <div class="tvol"><span class="tvoln" id="volB">5.00</span><span class="tvolu">m³</span></div>
-      </div></div>
-      <div class="farr" id="outB">▼ OUT</div>
-      <div class="frate">
-        IN:<span class="fiv" id="finvB">0.00</span>｜OUT:<span class="fov" id="foutvB">0.00</span><br>
-        <span style="font-size:8px;color:var(--txt3)">m³/h</span>
+      <div class="tcard">
+        <div class="tname" style="color:var(--grn)">● TANK-B <span class="dbdg" id="dbdgB" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="farr" id="inB">▼ IN</div>
+        <div class="tbw"><div class="tsh">
+          <div class="tofline"></div>
+          <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
+          <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
+          <div class="tfill" id="fillB" style="height:16.67%"><div class="rpl"></div></div>
+          <div class="tvol"><span class="tvoln" id="volB">5.00</span><span class="tvolu">m³</span></div>
+        </div></div>
+        <div class="farr" id="outB">▼ OUT</div>
+        <div class="frate">IN:<span class="fiv" id="finvB">0.000</span>｜OUT:<span class="fov" id="foutvB">0.000</span><br><span style="font-size:12px;color:var(--txt3)">m³/h</span></div>
+        <div class="stag si" id="stagB">待機</div>
       </div>
-      <div class="stag si" id="stagB">待機</div>
-    </div>
-    <div class="tcard">
-      <div class="tname" style="color:var(--org)">● TANK-C</div>
-      <div class="farr" id="inC">▼ IN</div>
-      <div class="tbw"><div class="tsh">
-        <div class="tofline"></div>
-        <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
-        <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
-        <div class="tfill" id="fillC" style="height:0%"><div class="rpl"></div></div>
-        <div class="tvol"><span class="tvoln" id="volC">0.00</span><span class="tvolu">m³</span></div>
-      </div></div>
-      <div class="farr" id="outC">▼ OUT</div>
-      <div class="frate">
-        IN:<span class="fiv" id="finvC">0.00</span>｜OUT:<span class="fov" id="foutvC">0.00</span><br>
-        <span style="font-size:8px;color:var(--txt3)">m³/h</span>
-      </div>
-      <div class="stag si" id="stagC">待機</div>
-    </div>
-  </div>
-
-  <!-- Holdup Bar -->
-  <div id="hd">
-    <div class="hdtop">
-      <span class="hdtit">⬡ 系内ホールドアップ（プロセス内保有量）: 100.0 m³</span>
-      <span class="hdinf" id="hdEbPct">EB: 40.0%</span>
-    </div>
-    <div class="hdbr">
-      <div class="hdeb" id="hdEb" style="width:40%">EB: 40.0 m³</div>
-      <div class="hdst" id="hdSt">ST: 60.0 m³</div>
-    </div>
-    <div class="hdst2">
-      <div class="hds"><div class="hdsk">EB保有量</div><div class="hdsv heb" id="hdEB">40.0 m³</div></div>
-      <div class="hds"><div class="hdsk">ST保有量</div><div class="hdsv hst" id="hdST">60.0 m³</div></div>
-      <div class="hds"><div class="hdsk">合計</div><div class="hdsv htot">100.0 m³</div></div>
-      <div class="hds"><div class="hdsk">適用フェーズ</div><div class="hdsv hph" id="hdPh">Phase 1</div></div>
-    </div>
-  </div>
-
-  <!-- Trend Graph -->
-  <div id="trp">
-    <div class="trtop">
-      <span class="trtit">📈 タンクレベル トレンドグラフ（0–12h）</span>
-      <div class="trleg">
-        <div class="tleg"><div class="tlegl" style="background:var(--cyan)"></div>Tank A</div>
-        <div class="tleg"><div class="tlegl" style="background:var(--grn)"></div>Tank B</div>
-        <div class="tleg"><div class="tlegl" style="background:var(--org)"></div>Tank C</div>
-        <div class="tleg"><div class="tlegl" style="background:var(--yel);opacity:.6"></div>Tsw</div>
-        <div class="tleg"><div class="tlegl" style="background:var(--red);opacity:.7"></div>現在時刻</div>
+      <div class="tcard">
+        <div class="tname" style="color:var(--org)">● TANK-C <span class="dbdg" id="dbdgC" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="farr" id="inC">▼ IN</div>
+        <div class="tbw"><div class="tsh">
+          <div class="tofline"></div>
+          <div class="tmk" style="bottom:66.67%"></div><div class="tml" style="bottom:66.67%">20</div>
+          <div class="tmk" style="bottom:33.33%"></div><div class="tml" style="bottom:33.33%">10</div>
+          <div class="tfill" id="fillC" style="height:0%"><div class="rpl"></div></div>
+          <div class="tvol"><span class="tvoln" id="volC">0.00</span><span class="tvolu">m³</span></div>
+        </div></div>
+        <div class="farr" id="outC">▼ OUT</div>
+        <div class="frate">IN:<span class="fiv" id="finvC">0.000</span>｜OUT:<span class="fov" id="foutvC">0.000</span><br><span style="font-size:12px;color:var(--txt3)">m³/h</span></div>
+        <div class="stag si" id="stagC">待機</div>
       </div>
     </div>
-    <svg id="tsvg" viewBox="0 0 700 185" style="height:185px">
-      <line x1="50" y1="155" x2="650" y2="155" stroke="rgba(70,96,210,.35)" stroke-width="1"/>
-      <line x1="50" y1="14"  x2="50"  y2="155" stroke="rgba(70,96,210,.35)" stroke-width="1"/>
-      <line x1="50" y1="20"  x2="650" y2="20"  stroke="rgba(70,96,210,.09)" stroke-width="1" stroke-dasharray="3,4"/>
-      <line x1="50" y1="63"  x2="650" y2="63"  stroke="rgba(70,96,210,.09)" stroke-width="1" stroke-dasharray="3,4"/>
-      <line x1="50" y1="107" x2="650" y2="107" stroke="rgba(70,96,210,.09)" stroke-width="1" stroke-dasharray="3,4"/>
-      <line x1="150" y1="14" x2="150" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1" stroke-dasharray="2,5"/>
-      <line x1="250" y1="14" x2="250" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1" stroke-dasharray="2,5"/>
-      <line x1="350" y1="14" x2="350" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1" stroke-dasharray="2,5"/>
-      <line x1="450" y1="14" x2="450" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1" stroke-dasharray="2,5"/>
-      <line x1="550" y1="14" x2="550" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1" stroke-dasharray="2,5"/>
-      <text x="44" y="23"  fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="end" font-family="Courier New">30</text>
-      <text x="44" y="66"  fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="end" font-family="Courier New">20</text>
-      <text x="44" y="110" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="end" font-family="Courier New">10</text>
-      <text x="44" y="158" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="end" font-family="Courier New">0</text>
-      <text x="23" y="88"  fill="rgba(112,128,160,.45)" font-size="8" text-anchor="middle" font-family="Courier New" transform="rotate(-90 23 88)">m³</text>
-      <text x="50"  y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">0h</text>
-      <text x="150" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">2h</text>
-      <text x="250" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">4h</text>
-      <text x="350" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">6h</text>
-      <text x="450" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">8h</text>
-      <text x="550" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">10h</text>
-      <text x="650" y="170" fill="rgba(112,128,160,.6)" font-size="8.5" text-anchor="middle" font-family="Courier New">12h</text>
-      <line x1="50" y1="21" x2="650" y2="21" stroke="rgba(237,137,54,.4)" stroke-width="1" stroke-dasharray="6,3"/>
-      <text x="654" y="24" fill="rgba(237,137,54,.55)" font-size="7.5" font-family="Courier New">29.9</text>
-      <line id="tswL" x1="150" y1="13" x2="150" y2="157" stroke="rgba(246,211,101,.55)" stroke-width="1.5" stroke-dasharray="5,4"/>
-      <text id="tswT" x="153" y="11" fill="rgba(246,211,101,.7)" font-size="8" font-family="Courier New">Tsw=2.0h</text>
-      <polygon id="areaA" points="" fill="rgba(76,201,240,.06)"/>
-      <polygon id="areaB" points="" fill="rgba(56,161,105,.06)"/>
-      <polygon id="areaC" points="" fill="rgba(237,137,54,.06)"/>
-      <polyline id="plA" points="" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline id="plB" points="" fill="none" stroke="var(--grn)"  stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      <polyline id="plC" points="" fill="none" stroke="var(--org)"  stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-      <line id="tbar" x1="50" y1="12" x2="50" y2="157" stroke="rgba(229,62,62,.88)" stroke-width="1.5" stroke-dasharray="4,3"/>
-      <polygon id="ttri" points="47,11 53,11 50,16" fill="rgba(229,62,62,.88)"/>
-    </svg>
-  </div>
 
-  <!-- Event Log -->
-  <div id="logp">
-    <div class="loghdr">
-      <div class="ldot"></div>
-      <span class="ltit">SEQUENCE EVENT LOG</span>
-      <span style="margin-left:auto;font-size:8.5px;color:var(--txt3);font-family:var(--mono)" id="logst">INITIALIZED</span>
+    <!-- Holdup -->
+    <div id="hd">
+      <div class="hdtop">
+        <span class="hdtit">⬡ 系内ホールドアップ（プロセス内保有量）: 100.0 m³</span>
+        <span class="hdinf" id="hdEbPct">EB: 35.0%</span>
+      </div>
+      <div class="hdbr">
+        <div class="hdeb" id="hdEb" style="width:35%">EB: 35.0 m³</div>
+        <div class="hdst" id="hdSt">ST: 65.0 m³</div>
+      </div>
+      <div class="hdst2">
+        <div class="hds"><div class="hdsk">EB保有量</div><div class="hdsv heb" id="hdEB">35.0 m³</div></div>
+        <div class="hds"><div class="hdsk">ST保有量</div><div class="hdsv hst" id="hdST">65.0 m³</div></div>
+        <div class="hds"><div class="hdsk">合計</div><div class="hdsv htot">100.0 m³</div></div>
+        <div class="hds"><div class="hdsk">適用フェーズ</div><div class="hdsv hph" id="hdPh">Phase 1</div></div>
+      </div>
     </div>
-    <div id="logbody"></div>
-  </div>
 
+    <!-- Trend Graph -->
+    <div id="trp">
+      <div class="trtop">
+        <span class="trtit" style="display:flex;align-items:center;gap:10px;">
+          📈 タンクレベル トレンドグラフ
+        </span>
+        <div class="trleg">
+          <div class="tleg"><div class="tlegl" style="background:var(--cyan)"></div>Tank A</div>
+          <div class="tleg"><div class="tlegl" style="background:var(--grn)"></div>Tank B</div>
+          <div class="tleg"><div class="tlegl" style="background:var(--org)"></div>Tank C</div>
+          <div class="tleg" id="legTsw"><div class="tlegl" style="background:var(--yel);opacity:.6"></div>Tsw</div>
+          <div class="tleg" id="legTkSw"  style="display:none"><div class="tlegl" style="background:var(--cyan);opacity:.8"></div>InSw</div>
+          <div class="tleg" id="legFoutSw" style="display:none"><div class="tlegl" style="background:var(--pink);opacity:.8"></div>OutSw</div>
+          <div class="tleg"><div class="tlegl" style="background:var(--red);opacity:.7"></div>現在時刻</div>
+        </div>
+      </div>
+      <svg id="tsvg" viewBox="0 0 700 185">
+        <line x1="50" y1="155" x2="650" y2="155" stroke="rgba(70,96,210,.35)" stroke-width="1.5"/>
+        <line x1="50" y1="14"  x2="50"  y2="155" stroke="rgba(70,96,210,.35)" stroke-width="1.5"/>
+        <line x1="50" y1="20"  x2="650" y2="20"  stroke="rgba(70,96,210,.09)" stroke-width="1.5" stroke-dasharray="3,4"/>
+        <line x1="50" y1="63"  x2="650" y2="63"  stroke="rgba(70,96,210,.09)" stroke-width="1.5" stroke-dasharray="3,4"/>
+        <line x1="50" y1="107" x2="650" y2="107" stroke="rgba(70,96,210,.09)" stroke-width="1.5" stroke-dasharray="3,4"/>
+        <line x1="150" y1="14" x2="150" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1.5" stroke-dasharray="2,5"/>
+        <line x1="250" y1="14" x2="250" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1.5" stroke-dasharray="2,5"/>
+        <line x1="350" y1="14" x2="350" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1.5" stroke-dasharray="2,5"/>
+        <line x1="450" y1="14" x2="450" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1.5" stroke-dasharray="2,5"/>
+        <line x1="550" y1="14" x2="550" y2="155" stroke="rgba(70,96,210,.06)" stroke-width="1.5" stroke-dasharray="2,5"/>
+        <text x="44" y="24"  fill="rgba(112,128,160,.6)" font-size="12" text-anchor="end" font-family="Courier New">30</text>
+        <text x="44" y="67"  fill="rgba(112,128,160,.6)" font-size="12" text-anchor="end" font-family="Courier New">20</text>
+        <text x="44" y="111" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="end" font-family="Courier New">10</text>
+        <text x="44" y="159" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="end" font-family="Courier New">0</text>
+        <text x="23" y="88"  fill="rgba(112,128,160,.45)" font-size="12" text-anchor="middle" font-family="Courier New" transform="rotate(-90 23 88)">m³</text>
+        <text id="tx0" x="50"  y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">0h</text>
+        <text id="tx4" x="150" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">4h</text>
+        <text id="tx8" x="250" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">8h</text>
+        <text id="tx12" x="350" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">12h</text>
+        <text id="tx16" x="450" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">16h</text>
+        <text id="tx20" x="550" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">20h</text>
+        <text id="tx24" x="650" y="173" fill="rgba(112,128,160,.6)" font-size="12" text-anchor="middle" font-family="Courier New">24h</text>
+        <line x1="50" y1="21" x2="650" y2="21" stroke="rgba(237,137,54,.4)" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <text x="654" y="24" fill="rgba(237,137,54,.55)" font-size="11" font-family="Courier New">29.9</text>
+        <!-- Tsw marker -->
+        <line id="tswL"     x1="150" y1="13" x2="150" y2="157" stroke="rgba(246,211,101,.55)" stroke-width="2" stroke-dasharray="5,4"/>
+        <text id="tswT"     x="153"  y="12"  fill="rgba(246,211,101,.7)" font-size="11.5" font-family="Courier New">Tsw=2.0h</text>
+        <!-- Optional IN switch marker -->
+        <line id="ttkSwL"   x1="0" y1="13" x2="0" y2="157" stroke="var(--cyan)"  stroke-width="2" stroke-dasharray="5,4" style="display:none"/>
+        <text id="ttkSwT"   x="3"  y="12"  fill="var(--cyan)"  font-size="11.5" font-family="Courier New" style="display:none">InSw</text>
+        <!-- Optional OUT switch marker -->
+        <line id="tfoutSwL" x1="0" y1="13" x2="0" y2="157" stroke="var(--pink)"  stroke-width="2" stroke-dasharray="5,4" style="display:none"/>
+        <text id="tfoutSwT" x="3"  y="12"  fill="var(--pink)"  font-size="11.5" font-family="Courier New" style="display:none">OutSw</text>
+        <!-- Area fills -->
+        <polygon id="areaA" points="" fill="rgba(76,201,240,.07)"/>
+        <polygon id="areaB" points="" fill="rgba(56,161,105,.07)"/>
+        <polygon id="areaC" points="" fill="rgba(237,137,54,.07)"/>
+        <!-- Polylines -->
+        <polyline id="plA" points="" fill="none" stroke="var(--cyan)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline id="plB" points="" fill="none" stroke="var(--grn)"  stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline id="plC" points="" fill="none" stroke="var(--org)"  stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Time cursor -->
+        <line    id="tbar" x1="50" y1="12" x2="50" y2="157" stroke="rgba(229,62,62,.88)" stroke-width="2" stroke-dasharray="4,3"/>
+        <polygon id="ttri" points="46,11 54,11 50,17" fill="rgba(229,62,62,.88)"/>
+      </svg>
+    </div>
+
+    <!-- Event Log -->
+    <div id="logp">
+      <div class="loghdr">
+        <div class="ldot"></div>
+        <span class="ltit">SEQUENCE EVENT LOG</span>
+        <span style="margin-left:auto;font-size:13px;color:var(--txt3);font-family:var(--mono)" id="logst">INITIALIZED</span>
+      </div>
+      <div id="logbody"></div>
+    </div>
+  </div>
 </main>
 </div>
 
 <script>
 'use strict';
 
-/* ═══════════════════════════════════════════════════════════
-   SYSTEM CONSTANTS  ← 拡張時はここを変更
-═══════════════════════════════════════════════════════════ */
-const C = Object.freeze({
-  V_MAX:    30.0,   // タンク最大容量 [m³]
-  V_HOLD:  100.0,   // 系内ホールドアップ [m³]
-  DENSITY: 890.0,   // Re液密度 [kg/m³]（比重 0.89）
-  T_END:    12.0,   // シミュレーション終了時間 [h]
-  DT:       0.02,   // 計算ステップ Δt [h]
-  STEPS:    601,    // 総ステップ数
-  OVERFLOW: 29.9,   // 満杯警告閾値 [m³]
-  DRYUP:    0.05,   // 空引き警告閾値 [m³]
-  EMPTY:    0.001,  // 枯渇判定閾値 [m³]
-});
+/* ═══════════════════════════════════════════
+   SYSTEM CONSTANTS
+═══════════════════════════════════════════ */
+const C = {
+  V_MAX:   30.0,
+  V_HOLD: 100.0,
+  DENSITY:890.0,
+  T_END:   24.0,
+  DT:       0.02,
+  STEPS:   1201,
+  OVERFLOW:29.9,
+  DRYUP:    0.05,
+  EMPTY:    0.001,
+};
 
-/* SVG座標変換 */
 const toX = t => 50 + (t / C.T_END) * 600;
 const toY = v => 150 - (Math.max(0, Math.min(C.V_MAX, v)) / C.V_MAX) * 130;
 
 let simSteps = [], evLog = [], curStep = 0, playTimer = null;
 
-/* ═══════════════════════════════════════════════════════════
-   SIMULATION ENGINE
-═══════════════════════════════════════════════════════════ */
-
-/**
- * 回収率計算
- * Rrec = EB_feed/100 + (1 - EB_feed/100) × (1 - RX/100)
- * EB_feed: フィード中目標EB濃度 [%]、RX: ST反応率 [%]
- */
-function calcRrec(eb_feed, rx) {
-  return (eb_feed / 100) + (1 - eb_feed / 100) * (1 - rx / 100);
+/* ═══════════════════════════════════════════
+   CALCULATION HELPERS
+═══════════════════════════════════════════ */
+function autoCalcSettings() {
+  const p2 = Number(document.getElementById('prod2').value)||180;
+  const rx2 = Number(document.getElementById('rx2').value)||55;
+  const cDensity = Number(document.getElementById('cDensity').value)||0.89;
+  const cVhold = Number(document.getElementById('cVhold').value)||100.0;
+  const F2 = (p2 * 1000 / 24) / (rx2 / 100);
+  const targetF_vol = F2 / (cDensity * 1000); 
+  if (targetF_vol > 0) {
+    const tTrans = cVhold / targetF_vol;
+    document.getElementById('tTrans').value = tTrans.toFixed(2);
+  }
+  
+  const tStop = Number(document.getElementById('tStop').value)||0;
+  const cAdd = Number(document.getElementById('cAdd').value)||0;
+  const p1 = Number(document.getElementById('prod1').value)||150;
+  const rx1 = Number(document.getElementById('rx1').value)||50;
+  const F1 = (p1 * 1000 / 24) / (rx1 / 100);
+  if (F1 - cAdd > 0) {
+    const stopDur = 18900 / (F1 - cAdd);
+    const tSw = tStop + stopDur;
+    document.getElementById('tSw').value = tSw.toFixed(2);
+  }
 }
 
-/**
- * Re液払出流量（体積） [m³/h] の計算
- *
- * トータルフィード F [kg/hr] を EB_feed% にするために
- * EB_re% の Re液をタンクから払い出す量:
- *   F_re = F × (EB_feed / EB_re)  [kg/hr]
- *   F_re_vol = F_re / ρ           [m³/h]
- *
- * EB_re < EB_feed の場合は F_re が F を超えるので F で上限
- */
+function formatTime(baseTimeStr, hours) {
+  if (!baseTimeStr) return hours.toFixed(2) + 'h';
+  const [bh, bm] = baseTimeStr.split(':').map(Number);
+  const totalMin = Math.round(bh * 60 + bm + hours * 60);
+  const h = Math.floor(totalMin / 60) % 24;
+  const m = totalMin % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+
+function calcRrec(rx)              { return 1 - rx / 100; }
+function calcFin_vol(F_kg, Rrec)  { return (F_kg * Rrec) / C.DENSITY; }
 function calcFout_vol(F_kg, eb_feed, eb_re) {
   if (eb_re <= 0) return F_kg / C.DENSITY;
-  const ratio = Math.min(1.0, eb_feed / eb_re);
-  return (F_kg * ratio) / C.DENSITY;
+  return (F_kg * Math.min(1.0, eb_feed / eb_re)) / C.DENSITY;
 }
 
-/**
- * 回収流量（体積） [m³/h] の計算
- *   F_in_mass = F × Rrec  [kg/hr]
- *   F_in_vol  = F_in_mass / ρ  [m³/h]
- */
-function calcFin_vol(F_kg, Rrec) {
-  return (F_kg * Rrec) / C.DENSITY;
-}
-
-/** フォームからパラメータ取得 */
 function getParams() {
-  const n = id => parseFloat(document.getElementById(id).value) || 0;
-  const s = id => document.getElementById(id).value;
+  const n  = id => parseFloat(document.getElementById(id).value) || 0;
+  const s  = id => document.getElementById(id).value;
+  const cb = id => document.getElementById(id).checked;
+  
+  C.V_MAX = n('cVmax') || 30.0;
+  C.V_HOLD = n('cVhold') || 100.0;
+  C.DENSITY = (n('cDensity') || 0.89) * 1000;
+  
   return {
     initA: n('initA'), initB: n('initB'), initC: n('initC'),
-    F1:     n('feedF1'), EB1:   n('eb1'), RX1:   n('rx1'), EBre1: n('ebRe1'),
-    F2:     n('feedF2'), EB2:   n('eb2'), RX2:   n('rx2'), EBre2: n('ebRe2'),
-    Tsw:    n('tSw'),
-    tkOld:  s('tkOld'),
-    tkNew:  s('tkNew'),
+    P1: n('prod1'), EB1: n('eb1'), RX1: n('rx1'), EBre1: n('ebRe1'),
+    P2: n('prod2'), EB2: n('eb2'), RX2: n('rx2'), EBre2: n('ebRe2'),
+    cAdd:   n('cAdd'),
+    enFeedStop: cb('enFeedStop'), tStop: cb('enFeedStop') ? n('tStop') : Infinity,
+    enTsw:  cb('enTsw'),          Tsw:   cb('enTsw') ? n('tSw') : Infinity,
+    tTrans: n('tTrans'),
+    tkOld:  s('tkOld'), tkNew: s('tkNew'),
+    isRateMode:  cb('modeRate'),
+    enTkSw:      cb('enTkSw'),  tTkSw:    n('tTkSw'),  tkNextIn:   s('tkNextIn'),
+    enFoutSw:    cb('enFoutSw'),tFoutSw:  n('tFoutSw'),tkNextFout: s('tkNextFout'),
+    enDist:      cb('enDist'),  tDistStart: n('tDistStart'), tkDistIn: s('tkDistIn'), fDistIn: n('fDistIn'),
+    tkDistOut:   s('tkDistOut'), fDistOut: n('fDistOut'),
+    baseTime:    s('baseTime')
   };
 }
 
 const clamp = v => Math.max(0, Math.min(C.V_MAX, v));
 
-/**
- * メイン計算エンジン
- *
- * フェーズ:
- *   Ph1 (t < Tsw)     : 旧タンクへ回収 & 旧タンクからフィード (G1条件)
- *   Ph2 (t≥Tsw, old>0): 新タンクへ回収 (G2条件)、旧タンクは一方的減少 (G1 Fout)
- *   Ph3 (old≤EMPTY)   : 新タンクで完全循環 (G2条件)
- */
+/* ═══════════════════════════════════════════
+   SIMULATION ENGINE
+═══════════════════════════════════════════ */
 function runSimulation(p) {
-  const Rrec1 = calcRrec(p.EB1, p.RX1);
-  const Rrec2 = calcRrec(p.EB2, p.RX2);
+  const F1 = p.RX1 > 0 ? (p.P1 * 1000 / 24) / (p.RX1 / 100) : 0;
+  const F2 = p.RX2 > 0 ? (p.P2 * 1000 / 24) / (p.RX2 / 100) : 0;
+  const Rrec1 = calcRrec(p.RX1), Rrec2 = calcRrec(p.RX2);
+  const fin1  = calcFin_vol(F1, Rrec1),   fout1 = calcFout_vol(F1, p.EB1, p.EBre1);
+  const fin2  = calcFin_vol(F2, Rrec2),   fout2 = calcFout_vol(F2, p.EB2, p.EBre2);
 
-  // 各フェーズ固定の体積流量 [m³/h]
-  const fin1  = calcFin_vol(p.F1, Rrec1);          // Ph1: 旧タンクへの回収
-  const fout1 = calcFout_vol(p.F1, p.EB1, p.EBre1); // Ph1&2: 旧タンクからの払出
-  const fin2  = calcFin_vol(p.F2, Rrec2);           // Ph2&3: 新タンクへの回収
-  const fout2 = calcFout_vol(p.F2, p.EB2, p.EBre2); // Ph3: 新タンクからの払出
+  const distIn_vol = p.enDist ? p.fDistIn / C.DENSITY : 0;
+  const distOut_vol = p.enDist ? p.fDistOut / C.DENSITY : 0;
 
-  const steps = new Array(C.STEPS);
+  const deltaEB = ((p.EB1 - p.EB2) / 100) * C.V_HOLD;
+  let F_shift = 0;
+  if (p.tTrans > 0) F_shift = (Math.abs(deltaEB) / (p.EBre2 / 100)) / p.tTrans;
+
   let VA = clamp(p.initA), VB = clamp(p.initB), VC = clamp(p.initC);
-  let phase = 1;
+  const steps = new Array(C.STEPS);
 
   for (let i = 0; i < C.STEPS; i++) {
     const t = +(i * C.DT).toFixed(3);
+    const isRate2 = t >= p.Tsw - 1e-9;
 
-    // フェーズ遷移
-    if (phase === 1 && t >= p.Tsw - 1e-9) phase = 2;
+    let curEB = p.EB1;
+    if (t >= p.Tsw) {
+      if (t >= p.Tsw + p.tTrans) curEB = p.EB2;
+      else curEB = p.EB1 + (p.EB2 - p.EB1) * (t - p.Tsw) / p.tTrans;
+    }
+    const inTransition = t >= p.Tsw - 1e-9 && t <= p.Tsw + p.tTrans + 1e-9;
+
+    const curFin_ideal  = isRate2 ? fin2  : fin1;
+    const curFout_ideal = isRate2 ? fout2 : fout1;
+
+    let curTkIn = p.tkOld;
+    if (!p.isRateMode && isRate2) curTkIn = p.tkNew;
+    if (p.enTkSw && t >= p.tTkSw - 1e-9) curTkIn = p.tkNextIn;
+
+    let curTkOut = p.tkOld;
     const Vold = p.tkOld === 'A' ? VA : p.tkOld === 'B' ? VB : VC;
-    if (phase === 2 && Vold <= C.EMPTY) phase = 3;
+    if (!p.isRateMode && curTkIn !== p.tkOld && Vold <= C.EMPTY) curTkOut = p.tkNew;
+    if (p.enFoutSw && t >= p.tFoutSw - 1e-9) curTkOut = p.tkNextFout;
 
-    let FinA = 0, FinB = 0, FinC = 0;
-    let FoutA = 0, FoutB = 0, FoutC = 0;
-    let activeEB;
+    let FinA = 0, FinB = 0, FinC = 0, FoutA = 0, FoutB = 0, FoutC = 0;
+    if      (curTkIn === 'A') FinA = curFin_ideal;
+    else if (curTkIn === 'B') FinB = curFin_ideal;
+    else                       FinC = curFin_ideal;
 
-    if (phase === 1) {
-      // 旧タンク: 回収あり & フィード中
-      if (p.tkOld === 'A') { FinA = fin1; FoutA = fout1; }
-      else if (p.tkOld === 'B') { FinB = fin1; FoutB = fout1; }
-      else { FinC = fin1; FoutC = fout1; }
-      activeEB = p.EB1;
+    const curV_out = curTkOut === 'A' ? VA : curTkOut === 'B' ? VB : VC;
+    let fout_actual = curFout_ideal;
+    if (t >= p.tStop && t < p.Tsw) fout_actual = 0;
+    if (curTkIn !== curTkOut) fout_actual = Math.min(fout_actual, curV_out / C.DT);
+    if      (curTkOut === 'A') FoutA = fout_actual;
+    else if (curTkOut === 'B') FoutB = fout_actual;
+    else                        FoutC = fout_actual;
 
-    } else if (phase === 2) {
-      // 新タンク: 次グレード回収
-      if (p.tkNew === 'A') FinA = fin2;
-      else if (p.tkNew === 'B') FinB = fin2;
-      else FinC = fin2;
-      // 旧タンク: フィードのみ（残量を超えないよう制限）
-      const Vold2 = p.tkOld === 'A' ? VA : p.tkOld === 'B' ? VB : VC;
-      const fo = Math.min(fout1, Vold2 / C.DT);
-      if (p.tkOld === 'A') FoutA = fo;
-      else if (p.tkOld === 'B') FoutB = fo;
-      else FoutC = fo;
-      activeEB = p.EB1;
-
-    } else {
-      // Ph3: 旧タンク確実0、新タンクで循環
-      if (p.tkOld === 'A') VA = 0;
-      else if (p.tkOld === 'B') VB = 0;
-      else VC = 0;
-      if (p.tkNew === 'A') { FinA = fin2; FoutA = fout2; }
-      else if (p.tkNew === 'B') { FinB = fin2; FoutB = fout2; }
-      else { FinC = fin2; FoutC = fout2; }
-      activeEB = p.EB2;
+    let isFshiftApplied = false, isShiftIn = false;
+    if (inTransition && F_shift > 0.001) {
+      isFshiftApplied = true;
+      if (deltaEB > 0) {
+        isShiftIn = true;
+        if      (curTkIn === 'A') FinA  += F_shift;
+        else if (curTkIn === 'B') FinB  += F_shift;
+        else                       FinC  += F_shift;
+      } else {
+        const sa = Math.min(F_shift, curV_out / C.DT);
+        if      (curTkOut === 'A') FoutA += sa;
+        else if (curTkOut === 'B') FoutB += sa;
+        else                        FoutC += sa;
+      }
     }
 
+    let dFinA = 0, dFinB = 0, dFinC = 0, dFoutA = 0, dFoutB = 0, dFoutC = 0;
+    let distRunning = p.enDist && (t >= p.tDistStart);
+    if (distRunning) {
+      const vDistTarget = p.tkDistIn === 'A' ? VA : p.tkDistIn === 'B' ? VB : VC;
+      let actualDistOut = distIn_vol;
+      if (vDistTarget <= C.EMPTY) actualDistOut = 0;
+      
+      if      (p.tkDistIn === 'A') dFoutA = actualDistOut;
+      else if (p.tkDistIn === 'B') dFoutB = actualDistOut;
+      else                         dFoutC = actualDistOut;
+
+      if      (p.tkDistOut === 'A') dFinA = distOut_vol;
+      else if (p.tkDistOut === 'B') dFinB = distOut_vol;
+      else                          dFinC = distOut_vol;
+    }
+
+    FinA += dFinA; FinB += dFinB; FinC += dFinC;
+    FoutA += dFoutA; FoutB += dFoutB; FoutC += dFoutC;
+
+    let phase = 1;
+    if (curTkIn !== p.tkOld) phase = curTkOut === p.tkOld ? 2 : 3;
+
     steps[i] = {
-      t, phase,
-      VA, VB, VC,
-      FinA, FinB, FinC,
-      FoutA, FoutB, FoutC,
-      holdEB: C.V_HOLD * (activeEB / 100),
-      holdST: C.V_HOLD * (1 - activeEB / 100),
-      activeEB,
+      t, phase, VA, VB, VC, FinA, FinB, FinC, FoutA, FoutB, FoutC,
+      holdEB: C.V_HOLD * (curEB / 100), holdST: C.V_HOLD * (1 - curEB / 100), activeEB: curEB,
       ofA: VA >= C.V_MAX, ofB: VB >= C.V_MAX, ofC: VC >= C.V_MAX,
+      isRateMode: p.isRateMode, isRate2, isFshiftApplied, isShiftIn,
+      distActive: distRunning, distTkIn: distRunning ? p.tkDistIn : null, distTkOut: distRunning ? p.tkDistOut : null
     };
 
     if (i < C.STEPS - 1) {
@@ -573,219 +750,346 @@ function runSimulation(p) {
   return steps;
 }
 
-/** イベントログをプリコンパイル */
+/* ═══════════════════════════════════════════
+   EVENT LOG
+═══════════════════════════════════════════ */
 function buildEvLog(steps, p) {
-  const events = [];
-  const push = (t, lv, msg) => events.push({ t, lv, msg });
-  const r1 = calcRrec(p.EB1, p.RX1), r2 = calcRrec(p.EB2, p.RX2);
-  const fi1 = calcFin_vol(p.F1, r1), fo1 = calcFout_vol(p.F1, p.EB1, p.EBre1);
-  const fi2 = calcFin_vol(p.F2, r2), fo2 = calcFout_vol(p.F2, p.EB2, p.EBre2);
-  const net1 = fi1 - fo1, net2 = fi2 - fo2;
+  const ev = [], push = (t,lv,msg) => ev.push({t,lv,msg});
+  const F1 = p.RX1 > 0 ? (p.P1*1000/24)/(p.RX1/100) : 0;
+  const F2 = p.RX2 > 0 ? (p.P2*1000/24)/(p.RX2/100) : 0;
+  const r1 = calcRrec(p.RX1), r2 = calcRrec(p.RX2);
+  const fi1 = calcFin_vol(F1,r1), fo1 = calcFout_vol(F1,p.EB1,p.EBre1);
+  const fi2 = calcFin_vol(F2,r2), fo2 = calcFout_vol(F2,p.EB2,p.EBre2);
+  const net1 = fi1-fo1, net2 = fi2-fo2;
+  const sgn = n => (n>=0?'+':'') + n.toFixed(3);
 
-  push(0, 'info', `シミュレーション開始 | フィード元/回収先: タンク${p.tkOld} | 初期: A=${p.initA}m³ B=${p.initB}m³ C=${p.initC}m³`);
-  push(0, 'info', `[G1] F₁=${p.F1.toLocaleString()}kg/hr, EB₁=${p.EB1}%, RX₁=${p.RX1}%, EB_re₁=${p.EBre1}%`);
-  push(0, 'info', `     Rrec=${r1.toFixed(4)}, Fᵢₙ=${fi1.toFixed(3)}m³/h, Fout=${fo1.toFixed(3)}m³/h, 正味=${net1>=0?'+':''}${net1.toFixed(3)}m³/h`);
-  push(0, 'info', `[G2] F₂=${p.F2.toLocaleString()}kg/hr, EB₂=${p.EB2}%, RX₂=${p.RX2}%, EB_re₂=${p.EBre2}%`);
-  push(0, 'info', `     Rrec=${r2.toFixed(4)}, Fᵢₙ=${fi2.toFixed(3)}m³/h, Fout=${fo2.toFixed(3)}m³/h, 正味=${net2>=0?'+':''}${net2.toFixed(3)}m³/h`);
-  push(p.Tsw, 'hi', `▶ T=${p.Tsw.toFixed(1)}h: 回収先タンク切替 [${p.tkOld}→${p.tkNew}] | 次グレード回収 Fᵢₙ=${fi2.toFixed(3)}m³/h → タンク${p.tkNew}`);
-  push(p.Tsw, 'hi', `  タンク${p.tkOld}: 回収停止 → 一方的減少（Fout=${fo1.toFixed(3)}m³/h）`);
+  push(0,'info',`START | モード: ${p.isRateMode?'レート変更':'グレード切替'} | A:${p.initA}m³ B:${p.initB}m³ C:${p.initC}m³`);
+  
+  if (p.enFeedStop && p.tStop < p.Tsw && p.tStop !== Infinity) {
+    push(p.tStop,'hi',`▶ T=${p.tStop.toFixed(1)}h: Re液フィード停止 (～${p.enTsw ? p.Tsw.toFixed(1) : '∞'}h)`);
+  }
 
-  for (let i = 1; i < steps.length; i++) {
-    if (steps[i].phase === 3 && steps[i-1].phase === 2) {
-      push(steps[i].t, 'ok', `✔ T=${steps[i].t.toFixed(2)}h: タンク${p.tkOld} 枯渇完了 | フィード元 → タンク${p.tkNew} 自動切替`);
-      push(steps[i].t, 'ok', `  グレード2完全移行: Fout=${fo2.toFixed(3)}m³/h, 正味=${net2>=0?'+':''}${net2.toFixed(3)}m³/h`);
-      break;
+  if (p.enTsw && p.Tsw !== Infinity) {
+    if (p.isRateMode) {
+      push(p.Tsw,'hi',`▶ T=${p.Tsw.toFixed(1)}h: レート条件変更 [Rate1 → Rate2]`);
+    } else {
+      push(p.Tsw,'hi',`▶ T=${p.Tsw.toFixed(1)}h: FC受入タンク・払出切替 [${p.tkOld}→${p.tkNew}]`);
+    }
+
+    const dEB = ((p.EB1-p.EB2)/100)*C.V_HOLD;
+    if (Math.abs(dEB)>0.001 && p.tTrans>0) push(p.Tsw,'hi',`  [置換] EB濃度置換開始 (${p.tTrans.toFixed(1)}h)`);
+  }
+  
+  if (p.enTkSw)   push(p.tTkSw, 'lhi',`▶ T=${p.tTkSw.toFixed(1)}h: [任意] IN先切替 → タンク${p.tkNextIn}`);
+  if (p.enFoutSw) push(p.tFoutSw,'lout',`▶ T=${p.tFoutSw.toFixed(1)}h: [任意] OUT元切替 → タンク${p.tkNextFout}`);
+  
+  let toastTriggered = false;
+  for (let i=1;i<steps.length;i++) {
+    if (p.enDist && steps[i].t >= p.tDistStart && p.tkDistIn === steps[i].distTkIn && steps[i].VA <= C.EMPTY && steps[i-1].VA > C.EMPTY) {
+      push(steps[i].t,'warn',`⚗ 精留警告: タンク${steps[i].distTkIn}枯渇のため、精留への抽出が一時停止しました。`); 
+      toastTriggered = true;
     }
   }
-  ['A','B','C'].forEach(tk => {
-    let warned = false;
-    for (let i = 1; i < steps.length; i++) {
-      if (!warned && steps[i]['of'+tk] && !steps[i-1]['of'+tk]) {
-        push(steps[i].t, 'err', `⚠ OVERFLOW: T=${steps[i].t.toFixed(2)}h タンク${tk} 30.0m³ 到達！オーバーフロー発生 — 運転見直し要`);
-        warned = true;
-      }
-    }
-  });
-  ['A','B','C'].forEach(tk => {
-    for (let i = 1; i < steps.length; i++) {
-      const v = steps[i]['V'+tk], vp = steps[i-1]['V'+tk], fo = steps[i]['Fout'+tk];
-      if (v <= C.DRYUP && vp > C.DRYUP && fo > 0.001) {
-        push(steps[i].t, 'warn', `⚠ DRY-UP: T=${steps[i].t.toFixed(2)}h タンク${tk} 空引き警告（残${v.toFixed(3)}m³, Fout=${fo.toFixed(3)}m³/h）`);
-        break;
-      }
-    }
-  });
 
-  events.sort((a, b) => a.t - b.t);
-  return events;
+  if (toastTriggered) {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  return ev;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RENDERING ENGINE
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   RENDERING
+═══════════════════════════════════════════ */
 const STATUS = {
-  dryup:    { t:'空引き警告',  c:'sd' },
-  overflow: { t:'満杯警告',   c:'sv' },
-  both:     { t:'回収/F中',   c:'sb' },
-  in:       { t:'回収中(IN)', c:'sn' },
-  out:      { t:'フィード中', c:'so' },
-  idle:     { t:'待機',       c:'si' },
+  dryup:   {t:'空引き警告', c:'sd'},
+  overflow:{t:'満杯警告',   c:'sv'},
+  both:    {t:'回収/F中',   c:'sb'},
+  in:      {t:'回収中(IN)', c:'sn'},
+  out:     {t:'フィード中', c:'so'},
+  idle:    {t:'待機',       c:'si'},
 };
-
-function getStatus(V, Fin, Fout) {
-  if (V <= C.DRYUP && Fout > 0.001) return 'dryup';
-  if (V >= C.OVERFLOW)               return 'overflow';
-  if (Fin > 0.001 && Fout > 0.001)  return 'both';
-  if (Fin > 0.001)                   return 'in';
-  if (Fout > 0.001)                  return 'out';
+function getStatus(V,Fin,Fout) {
+  if (V<=C.DRYUP && Fout>0.001) return 'dryup';
+  if (V>=C.OVERFLOW)             return 'overflow';
+  if (Fin>0.001 && Fout>0.001)  return 'both';
+  if (Fin>0.001)                 return 'in';
+  if (Fout>0.001)                return 'out';
   return 'idle';
 }
 
-function updateTank(tk, V, Fin, Fout) {
-  const pct = Math.max(0, Math.min(100, (V / C.V_MAX) * 100));
-  const st = getStatus(V, Fin, Fout);
-  const { t, c } = STATUS[st];
-  const fill = document.getElementById('fill' + tk);
-  fill.style.height = pct + '%';
-  fill.className = 'tfill' + (st==='dryup'?' fdup':st==='overflow'?' fovf':'');
-  document.getElementById('vol'   + tk).textContent = V.toFixed(2);
-  document.getElementById('finv'  + tk).textContent = Fin.toFixed(3);
-  document.getElementById('foutv' + tk).textContent = Fout.toFixed(3);
-  document.getElementById('in'    + tk).className   = 'farr' + (Fin  > 0.001 ? ' fion' : '');
-  document.getElementById('out'   + tk).className   = 'farr' + (Fout > 0.001 ? ' foon' : '');
-  const stag = document.getElementById('stag' + tk);
-  stag.textContent = t; stag.className = 'stag ' + c;
+function updateTank(tk, V, Fin, Fout, shift, shiftIn) {
+  const pct = Math.max(0, Math.min(100, (V/C.V_MAX)*100));
+  const st  = getStatus(V, Fin, Fout);
+  const {t, c} = STATUS[st];
+  const fill = document.getElementById('fill'+tk);
+  fill.style.height = pct+'%';
+  fill.className = 'tfill'+(st==='dryup'?' fdup':st==='overflow'?' fovf':'');
+  document.getElementById('vol'+tk).textContent   = V.toFixed(2);
+  document.getElementById('finv'+tk).textContent  = Fin.toFixed(3);
+  document.getElementById('foutv'+tk).textContent = Fout.toFixed(3);
+  const elIn  = document.getElementById('in'+tk);
+  const elOut = document.getElementById('out'+tk);
+  elIn.className  = 'farr'+(Fin >0.001?(shift&&shiftIn?' fadd':' fion'):'');
+  elOut.className = 'farr'+(Fout>0.001?(shift&&!shiftIn?' fadd':' foon'):'');
+  elIn.textContent  = (shift&&shiftIn &&Fin >0.001) ? '▼ IN (置換還流+)'  : '▼ IN';
+  elOut.textContent = (shift&&!shiftIn&&Fout>0.001) ? '▼ OUT (置換抜出+)' : '▼ OUT';
+  const stag = document.getElementById('stag'+tk);
+  stag.textContent = t; stag.className = 'stag '+c;
 }
 
 function renderStep(idx) {
-  const s = simSteps[idx];
-  if (!s) return;
-  document.getElementById('tdisp').innerHTML = s.t.toFixed(2) + '<small> h</small>';
+  const s = simSteps[idx]; if (!s) return;
+  const bt = document.getElementById('baseTime').value || "00:00";
+  document.getElementById('tdisp').innerHTML = `${formatTime(bt, s.t)} <small>(${s.t.toFixed(2)}h)</small>`;
   document.getElementById('tslider').value = idx;
-  const pc = ['pt1','pt2','pt3'][s.phase-1];
-  const pt = ['Phase 1: 現グレード循環','Phase 2: 旧タンク枯渇中','Phase 3: 新グレード安定運転'][s.phase-1];
-  const pd = document.getElementById('pdisp');
-  pd.textContent = pt; pd.className = 'ptag ' + pc;
-  updateTank('A', s.VA, s.FinA, s.FoutA);
-  updateTank('B', s.VB, s.FinB, s.FoutB);
-  updateTank('C', s.VC, s.FinC, s.FoutC);
-  const ep = s.activeEB;
-  document.getElementById('hdEb').style.width = ep + '%';
-  document.getElementById('hdEb').textContent = ep > 8 ? ('EB: ' + s.holdEB.toFixed(1) + ' m³') : '';
-  document.getElementById('hdSt').textContent = (100-ep) > 8 ? ('ST: ' + s.holdST.toFixed(1) + ' m³') : '';
-  document.getElementById('hdEbPct').textContent = 'EB: ' + ep.toFixed(1) + '%';
-  document.getElementById('hdEB').textContent = s.holdEB.toFixed(1) + ' m³';
-  document.getElementById('hdST').textContent = s.holdST.toFixed(1) + ' m³';
-  document.getElementById('hdPh').textContent = 'Phase ' + s.phase;
-  const xT = toX(s.t).toFixed(1);
-  document.getElementById('tbar').setAttribute('x1', xT);
-  document.getElementById('tbar').setAttribute('x2', xT);
-  document.getElementById('ttri').setAttribute('points', (xT-3)+',11 '+(+xT+3)+',11 '+xT+',16');
+
+  let pc, pt;
+  if (s.isRateMode) {
+    const rs = s.isRate2?'Rate 2':'Rate 1';
+    if (s.phase===1){pc='pt1';pt=`${rs}: 単一タンク稼働`;}
+    else if(s.phase===2){pc='pt2';pt=`${rs}: 旧タンク枯渇中`;}
+    else{pc='pt3';pt=`${rs}: 切替後安定`;}
+  } else {
+    const phT=['Phase 1: 現グレード循環','Phase 2: 旧タンク枯渇中','Phase 3: 新グレード安定運転'];
+    const phC=['pt1','pt2','pt3'];
+    const idx2=(s.phase||1)-1;
+    pc=phC[idx2]||'pt1'; pt=phT[idx2]||phT[0];
+  }
+  const pd=document.getElementById('pdisp');
+  pd.textContent=pt; pd.className='ptag '+pc;
+
+  updateTank('A',s.VA,s.FinA,s.FoutA,s.isFshiftApplied,s.isShiftIn);
+  updateTank('B',s.VB,s.FinB,s.FoutB,s.isFshiftApplied,s.isShiftIn);
+  updateTank('C',s.VC,s.FinC,s.FoutC,s.isFshiftApplied,s.isShiftIn);
+
+  // 精留バッジ
+  ['A','B','C'].forEach(tk => {
+    const bdg = document.getElementById('dbdg'+tk);
+    if (!bdg) return;
+    if (s.distActive && (s.distTkIn === tk || s.distTkOut === tk)) {
+      bdg.style.display = 'inline-block';
+      let t = [];
+      if (s.distTkIn === tk) t.push('抽出');
+      if (s.distTkOut === tk) t.push('生産');
+      bdg.textContent = '⚗ 精留' + t.join('+');
+    } else {
+      bdg.style.display = 'none';
+    }
+  });
+
+  // Holdup
+  const hpct = Math.min(100,(s.holdEB/C.V_HOLD)*100);
+  document.getElementById('hdEb').style.width    = hpct.toFixed(1)+'%';
+  document.getElementById('hdEb').textContent    = `EB: ${s.holdEB.toFixed(1)} m³`;
+  document.getElementById('hdSt').textContent    = `ST: ${s.holdST.toFixed(1)} m³`;
+  document.getElementById('hdEbPct').textContent = `EB: ${s.activeEB.toFixed(1)}%`;
+  document.getElementById('hdEB').textContent    = s.holdEB.toFixed(1)+' m³';
+  document.getElementById('hdST').textContent    = s.holdST.toFixed(1)+' m³';
+  document.getElementById('hdPh').textContent    = s.isRateMode?(s.isRate2?'Rate 2':'Rate 1'):`Phase ${s.phase}`;
+
+  // Time cursor
+  const bx = toX(s.t).toFixed(1);
+  document.getElementById('tbar').setAttribute('x1',bx);
+  document.getElementById('tbar').setAttribute('x2',bx);
+  document.getElementById('ttri').setAttribute('points',`${+bx-4},11 ${+bx+4},11 ${bx},17`);
 }
 
 function renderTrend(steps, p) {
-  const pA = [], pB = [], pC = [];
-  for (let i = 0; i < steps.length; i++) {
-    const s = steps[i];
-    const x = toX(s.t).toFixed(1);
-    pA.push(x + ',' + toY(s.VA).toFixed(1));
-    pB.push(x + ',' + toY(s.VB).toFixed(1));
-    pC.push(x + ',' + toY(s.VC).toFixed(1));
+  const bt = p.baseTime || "00:00";
+  [0,4,8,12,16,20,24].forEach(h => {
+    const el = document.getElementById('tx'+h);
+    if(el) el.textContent = formatTime(bt, h);
+  });
+
+  // Tsw line
+  const tswL = document.getElementById('tswL');
+  const tswT = document.getElementById('tswT');
+  if (p.enTsw && p.Tsw !== Infinity) {
+    const tsx = toX(p.Tsw).toFixed(1);
+    tswL.setAttribute('x1',tsx);
+    tswL.setAttribute('x2',tsx);
+    tswT.setAttribute('x', +tsx+3);
+    tswT.textContent = `Tsw=${formatTime(bt, p.Tsw)} (${p.Tsw.toFixed(1)}h)`;
+    tswL.style.display='';
+    tswT.style.display='';
+    document.getElementById('legTsw').style.display='';
+  } else {
+    tswL.style.display='none';
+    tswT.style.display='none';
+    document.getElementById('legTsw').style.display='none';
   }
-  const close = ' 650,150 50,150';
-  document.getElementById('plA').setAttribute('points', pA.join(' '));
-  document.getElementById('plB').setAttribute('points', pB.join(' '));
-  document.getElementById('plC').setAttribute('points', pC.join(' '));
-  document.getElementById('areaA').setAttribute('points', pA.join(' ') + close);
-  document.getElementById('areaB').setAttribute('points', pB.join(' ') + close);
-  document.getElementById('areaC').setAttribute('points', pC.join(' ') + close);
-  const xSw = toX(p.Tsw).toFixed(1);
-  document.getElementById('tswL').setAttribute('x1', xSw);
-  document.getElementById('tswL').setAttribute('x2', xSw);
-  document.getElementById('tswT').setAttribute('x', +xSw + 2);
-  document.getElementById('tswT').textContent = 'Tsw=' + p.Tsw.toFixed(1) + 'h';
+
+  // Optional IN switch
+  const tkSwL=document.getElementById('ttkSwL'), tkSwT=document.getElementById('ttkSwT');
+  const legIn=document.getElementById('legTkSw');
+  if (p.enTkSw) {
+    const x=toX(p.tTkSw).toFixed(1);
+    tkSwL.setAttribute('x1',x); tkSwL.setAttribute('x2',x); tkSwT.setAttribute('x',+x+3);
+    tkSwL.style.display=tkSwT.style.display=legIn.style.display='';
+  } else { tkSwL.style.display=tkSwT.style.display=legIn.style.display='none'; }
+
+  // Optional OUT switch
+  const foSwL=document.getElementById('tfoutSwL'), foSwT=document.getElementById('tfoutSwT');
+  const legOut=document.getElementById('legFoutSw');
+  if (p.enFoutSw) {
+    const x=toX(p.tFoutSw).toFixed(1);
+    foSwL.setAttribute('x1',x); foSwL.setAttribute('x2',x); foSwT.setAttribute('x',+x+3);
+    foSwL.style.display=foSwT.style.display=legOut.style.display='';
+  } else { foSwL.style.display=foSwT.style.display=legOut.style.display='none'; }
+
+  // Build polylines (decimated)
+  const stride = Math.max(1, Math.floor(steps.length/400));
+  const pA=[], pB=[], pC=[];
+  for (let i=0;i<steps.length;i+=stride) {
+    const s=steps[i];
+    pA.push(`${toX(s.t).toFixed(1)},${toY(s.VA).toFixed(1)}`);
+    pB.push(`${toX(s.t).toFixed(1)},${toY(s.VB).toFixed(1)}`);
+    pC.push(`${toX(s.t).toFixed(1)},${toY(s.VC).toFixed(1)}`);
+  }
+  const last=steps[steps.length-1];
+  if ((steps.length-1)%stride!==0) {
+    pA.push(`${toX(last.t).toFixed(1)},${toY(last.VA).toFixed(1)}`);
+    pB.push(`${toX(last.t).toFixed(1)},${toY(last.VB).toFixed(1)}`);
+    pC.push(`${toX(last.t).toFixed(1)},${toY(last.VC).toFixed(1)}`);
+  }
+  const base=toY(0).toFixed(1);
+  const fx=toX(0).toFixed(1), lx=toX(last.t).toFixed(1);
+  [[pA,'A'],[pB,'B'],[pC,'C']].forEach(([pts,tk])=>{
+    const poly=pts.join(' ');
+    document.getElementById('pl'+tk).setAttribute('points',poly);
+    document.getElementById('area'+tk).setAttribute('points',`${fx},${base} ${poly} ${lx},${base}`);
+  });
 }
 
-function renderLog(events) {
-  const cls = { info:'linfo', hi:'lhi', warn:'lwarn', err:'lerr', ok:'lok' };
-  document.getElementById('logbody').innerHTML = events.map(ev =>
-    `<div class="le"><span class="let">[${ev.t.toFixed(2).padStart(5,'0')}h]</span><span class="lem ${cls[ev.lv]||'linfo'}">${ev.msg}</span></div>`
+function renderLog(ev) {
+  const bt = document.getElementById('baseTime').value || "00:00";
+  const cls={info:'linfo',hi:'lhi',warn:'lwarn',err:'lerr',ok:'lok',lhi:'lhi',lout:'lout'};
+  document.getElementById('logbody').innerHTML=ev.map(e=>
+    `<div class="le"><span class="let">[${formatTime(bt, e.t)} / ${String(e.t.toFixed(2)).padStart(5,'0')}h]</span><span class="lem ${cls[e.lv]||'linfo'}">${e.msg}</span></div>`
   ).join('');
-  document.getElementById('logst').textContent = events.length + ' EVENTS';
+  document.getElementById('logst').textContent=ev.length+' EVENTS';
 }
 
 function updateDerived(p) {
-  const r1 = calcRrec(p.EB1, p.RX1), r2 = calcRrec(p.EB2, p.RX2);
-  const fi1 = calcFin_vol(p.F1, r1),  fo1 = calcFout_vol(p.F1, p.EB1, p.EBre1);
-  const fi2 = calcFin_vol(p.F2, r2),  fo2 = calcFout_vol(p.F2, p.EB2, p.EBre2);
-  // Re液使用率 = EB_feed / EB_re (タンクから使うRe液の割合)
-  const ur1 = p.EBre1 > 0 ? Math.min(1, p.EB1 / p.EBre1) : 1;
-  const ur2 = p.EBre2 > 0 ? Math.min(1, p.EB2 / p.EBre2) : 1;
+  const F1=p.RX1>0?(p.P1*1000/24)/(p.RX1/100):0;
+  const F2=p.RX2>0?(p.P2*1000/24)/(p.RX2/100):0;
+  const r1=calcRrec(p.RX1), r2=calcRrec(p.RX2);
+  const fi1=calcFin_vol(F1,r1), fo1=calcFout_vol(F1,p.EB1,p.EBre1);
+  const fi2=calcFin_vol(F2,r2), fo2=calcFout_vol(F2,p.EB2,p.EBre2);
 
-  const fmt = (vol, F_kg) => `${vol.toFixed(3)} m³/h  (${(vol * C.DENSITY).toFixed(0)} kg/hr)`;
+  document.getElementById('calcF1').textContent=F1.toFixed(0);
+  document.getElementById('calcF2').textContent=F2.toFixed(0);
+  document.getElementById('rr1').textContent=(r1*100).toFixed(2)+'%';
+  document.getElementById('fi1').textContent=fi1.toFixed(3)+' m³/h';
+  document.getElementById('fo1').textContent=fo1.toFixed(3)+' m³/h';
+  document.getElementById('rr2').textContent=(r2*100).toFixed(2)+'%';
+  document.getElementById('fi2').textContent=fi2.toFixed(3)+' m³/h';
+  document.getElementById('fo2').textContent=fo2.toFixed(3)+' m³/h';
 
-  document.getElementById('rr1').textContent = r1.toFixed(4) + `  (Fin=${(fi1*C.DENSITY).toFixed(0)}kg/hr)`;
-  document.getElementById('fi1').textContent = fmt(fi1, p.F1);
-  document.getElementById('fo1').textContent = fmt(fo1, p.F1);
-  document.getElementById('ur1').textContent = (ur1*100).toFixed(2) + '%  (' + p.EB1.toFixed(1) + '/' + p.EBre1.toFixed(1) + ')';
-
-  document.getElementById('rr2').textContent = r2.toFixed(4) + `  (Fin=${(fi2*C.DENSITY).toFixed(0)}kg/hr)`;
-  document.getElementById('fi2').textContent = fmt(fi2, p.F2);
-  document.getElementById('fo2').textContent = fmt(fo2, p.F2);
-  document.getElementById('ur2').textContent = (ur2*100).toFixed(2) + '%  (' + p.EB2.toFixed(1) + '/' + p.EBre2.toFixed(1) + ')';
+  // ラベル切替（レートモード）
+  const isR=p.isRateMode;
+  document.getElementById('titleG2').textContent=isR?'📈 変更後レート条件（Rate 2）':'🔄 次グレード条件（Grade 2）';
+  document.getElementById('lblTsw').textContent=isR?'レート条件変更時間':'FC切替時間';
+  document.getElementById('lblTkOld').textContent=isR?'継続使用タンク':'使用中タンク';
+  document.getElementById('rowTkNew').style.display=isR?'none':'';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CONTROL FLOW
-═══════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   CONTROL
+═══════════════════════════════════════════ */
 function recalc() {
-  const t0 = performance.now();
-  const p = getParams();
-  simSteps = runSimulation(p);
-  evLog    = buildEvLog(simSteps, p);
-  renderTrend(simSteps, p);
-  renderLog(evLog);
+  const t0=performance.now();
+  const p=getParams();
+  autoCalcSettings();
   updateDerived(p);
-  renderStep(Math.min(curStep, C.STEPS - 1));
-  document.getElementById('perf').textContent = (performance.now() - t0).toFixed(1) + 'ms';
+  simSteps=runSimulation(p);
+  evLog=buildEvLog(simSteps,p);
+  renderTrend(simSteps,p);
+  renderLog(evLog);
+  renderStep(Math.min(curStep,C.STEPS-1));
+  document.getElementById('perf').textContent=(performance.now()-t0).toFixed(1)+'ms';
 }
 
 function togglePlay() {
   if (playTimer) {
-    clearInterval(playTimer); playTimer = null;
-    document.getElementById('bplay').textContent = '▶';
+    clearInterval(playTimer); playTimer=null;
+    document.getElementById('bplay').textContent='▶';
   } else {
-    if (curStep >= C.STEPS - 1) curStep = 0;
-    document.getElementById('bplay').textContent = '⏸';
-    playTimer = setInterval(() => {
+    if (curStep>=C.STEPS-1) curStep=0;
+    document.getElementById('bplay').textContent='⏸';
+    playTimer=setInterval(()=>{
       curStep++;
-      if (curStep >= C.STEPS) {
-        curStep = C.STEPS - 1;
-        clearInterval(playTimer); playTimer = null;
-        document.getElementById('bplay').textContent = '▶';
-      }
+      if (curStep>=C.STEPS){curStep=C.STEPS-1;clearInterval(playTimer);playTimer=null;document.getElementById('bplay').textContent='▶';}
       renderStep(curStep);
-    }, 150);
+    },80);
   }
 }
-
 function reset() {
-  if (playTimer) { clearInterval(playTimer); playTimer = null; }
-  document.getElementById('bplay').textContent = '▶';
-  curStep = 0; renderStep(0);
+  if (playTimer){clearInterval(playTimer);playTimer=null;}
+  document.getElementById('bplay').textContent='▶';
+  curStep=0; renderStep(0);
 }
 
-document.getElementById('bplay').addEventListener('click', togglePlay);
-document.getElementById('brst').addEventListener('click', reset);
-document.getElementById('tslider').addEventListener('input', e => {
-  if (playTimer) { clearInterval(playTimer); playTimer = null; document.getElementById('bplay').textContent = '▶'; }
-  curStep = parseInt(e.target.value, 10); renderStep(curStep);
+/* ═══════════════════════════════════════════
+   EVENT LISTENERS
+═══════════════════════════════════════════ */
+document.getElementById('bplay').addEventListener('click',togglePlay);
+document.getElementById('brst').addEventListener('click',reset);
+document.getElementById('tslider').addEventListener('input',e=>{
+  if(playTimer){clearInterval(playTimer);playTimer=null;document.getElementById('bplay').textContent='▶';}
+  curStep=parseInt(e.target.value,10); renderStep(curStep);
 });
-['initA','initB','initC','feedF1','eb1','rx1','ebRe1','feedF2','eb2','rx2','ebRe2','tSw','tkOld','tkNew']
-  .forEach(id => {
-    const el = document.getElementById(id);
-    el.addEventListener('input',  recalc);
-    el.addEventListener('change', recalc);
+
+// 最大化トグル
+document.getElementById('toggleMaximize').addEventListener('change',e=>{
+  const inp=document.getElementById('inp');
+  const txt=document.getElementById('toggleMaximizeText');
+  if(e.target.checked){
+    inp.style.maxHeight='0px'; inp.style.paddingTop='0'; inp.style.paddingBottom='0';
+    txt.textContent='⬇ 入力を表示';
+  } else {
+    inp.style.maxHeight=''; inp.style.paddingTop=''; inp.style.paddingBottom='';
+    txt.textContent='⬆ 入力を隠して最大化';
+  }
+});
+
+// 任意切替チェックボックス
+document.getElementById('enTkSw').addEventListener('change',e=>{
+  ['tTkSw','tkNextIn'].forEach(id=>document.getElementById(id).disabled=!e.target.checked);
+  recalc();
+});
+document.getElementById('enFoutSw').addEventListener('change',e=>{
+  ['tFoutSw','tkNextFout'].forEach(id=>document.getElementById(id).disabled=!e.target.checked);
+  recalc();
+});
+document.getElementById('enDist').addEventListener('change',e=>{
+  ['tDistStart','tkDistIn','fDistIn','tkDistOut','fDistOut'].forEach(id=>document.getElementById(id).disabled=!e.target.checked);
+  recalc();
+});
+
+// EB_re2理論値 自動計算（eb2/rx2 変更時）
+function autoCalcEBre2() {
+  const eb2=parseFloat(document.getElementById('eb2').value)||0;
+  const rx2=parseFloat(document.getElementById('rx2').value)||0;
+  if(rx2>0&&rx2<100) document.getElementById('ebRe2').value=Math.min(100,eb2/(1-rx2/100)).toFixed(1);
+}
+
+// 全入力フィールドへのリスナー
+['initA','initB','initC','prod1','rx1','eb1','ebRe1','prod2','rx2','eb2','ebRe2',
+ 'tSw','tTrans','tkOld','tkNew','modeRate', 'tDistStart', 'fDistIn', 'fDistOut', 'tkDistIn', 'tkDistOut',
+ 'cDensity', 'cVmax', 'cVhold', 'cAdd', 'tStop', 'baseTime']
+  .forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    const handler=()=>{
+      if(id==='eb2'||id==='rx2') autoCalcEBre2();
+      recalc();
+    };
+    el.addEventListener('input',handler);
+    el.addEventListener('change',handler);
   });
 
 recalc();
