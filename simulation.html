@@ -98,6 +98,13 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
 #tkrow{display:flex;gap:12px;flex-shrink:0}
 .tcard{flex:1;background:var(--card);border:1px solid var(--brd);border-radius:14px;padding:14px 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
 .tname{font-size:15px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase}
+.teb{font-family:var(--mono);font-size:14px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(4,6,13,.5);border:1px solid var(--brd);text-align:center;min-width:90px}
+.srow{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(4,6,13,.4);border:1px solid var(--brd);border-radius:8px;margin-bottom:6px;flex-wrap:wrap}
+.srow input[type=checkbox]{width:20px;height:20px}
+.srow input[type=number]{width:80px;font-size:18px}
+.srow select{width:180px;font-size:16px}
+.srow .sdel{width:32px;height:32px;background:rgba(229,62,62,.15);border:1px solid rgba(229,62,62,.3);border-radius:6px;color:var(--red);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.srow .sdel:hover{background:rgba(229,62,62,.3)}
 .farr{font-size:15px;font-weight:700;padding:3px 10px;border-radius:6px;transition:color .25s,text-shadow .25s,background .25s;color:var(--txt3);width:100%;text-align:center;background:rgba(4,6,13,.3)}
 .fion{color:#68d391!important;text-shadow:0 0 12px rgba(104,211,145,.7);background:rgba(56,161,105,.1)!important}
 .foon{color:var(--org)!important;text-shadow:0 0 12px rgba(237,137,54,.7);background:rgba(237,137,54,.1)!important}
@@ -206,6 +213,11 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
           <div class="t3c"><label class="lb">Tank B</label><input type="number" id="initB" value="5.0"  min="0" max="30" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
           <div class="t3c"><label class="lc">Tank C</label><input type="number" id="initC" value="0.0"  min="0" max="30" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">m³</span></div>
         </div>
+        <div class="t3" style="margin-top:4px">
+          <div class="t3c"><label class="la">EB%</label><input type="number" id="initEbA" value="70.0" min="0" max="100" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">%</span></div>
+          <div class="t3c"><label class="lb">EB%</label><input type="number" id="initEbB" value="70.0" min="0" max="100" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">%</span></div>
+          <div class="t3c"><label class="lc">EB%</label><input type="number" id="initEbC" value="70.0" min="0" max="100" step="0.1"><span style="font-size:13px;color:var(--txt2);text-align:center">%</span></div>
+        </div>
       </div>
     </div>
 
@@ -300,7 +312,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       </div>
       <div class="fr" style="background:rgba(255,255,255,.03);padding:6px;border-radius:6px;">
         <div class="frl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="enTsw" checked style="width:24px;height:24px"><span class="fn" id="lblTsw">FC切替時間</span></label></div>
-        <div class="fri"><input type="number" id="tSw" value="2.0" readonly style="border-color:rgba(255,255,255,.2);background:rgba(255,255,255,0.05);color:var(--txt)"><span class="ul">h後</span></div>
+        <div class="fri"><input type="number" id="tSw" value="5.0" min="0" max="24" step="0.1"><span class="ul">h後</span></div>
       </div>
       <div class="fr" style="background:rgba(246,211,101,.05);padding:6px;border-radius:6px;border:1px solid rgba(246,211,101,.2)">
         <div class="frl"><span class="fn" style="color:var(--yel)">レート変更後Reタンク置換時間</span></div>
@@ -381,7 +393,15 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     </div>
   </div>
 
-
+  <!-- タイムスケジュール -->
+  <div class="fs" style="flex:1 1 100%;border-color:rgba(246,211,101,.3)">
+    <div class="fsh" style="color:var(--yel);background:rgba(246,211,101,.04)">📅 タイムスケジュール</div>
+    <div class="fsb" id="schedBody">
+      <div style="font-size:14px;color:var(--txt2);margin-bottom:4px">任意の時間にアクションをセットしてタンクレベル推移をシミュレーション</div>
+      <div id="schedRows"></div>
+      <button id="addSched" style="margin-top:8px;padding:8px 18px;background:rgba(246,211,101,.1);border:1px solid rgba(246,211,101,.3);border-radius:8px;color:var(--yel);font-size:16px;font-weight:700;cursor:pointer;transition:all .15s">＋ アクション追加</button>
+    </div>
+  </div>
 
 </section>
 
@@ -396,6 +416,10 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       <input type="range" id="tslider" min="0" max="1200" step="1" value="0">
       <div class="sm"><span>0h</span><span>4h</span><span>8h</span><span>12h</span><span>16h</span><span>20h</span><span>24h</span></div>
     </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <input type="number" id="tJump" value="0" min="0" max="24" step="0.1" style="width:80px;font-size:18px;text-align:center">
+      <span style="font-size:14px;color:var(--txt2)">h</span>
+    </div>
     <label style="margin-left:auto;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--cyan);cursor:pointer;background:rgba(76,201,240,.08);padding:8px 12px;border-radius:8px;border:1px solid rgba(76,201,240,.3);flex-shrink:0;font-weight:bold;">
       <input type="checkbox" id="toggleMaximize" style="width:20px;height:20px;">
       <span id="toggleMaximizeText">⬆ 入力を隠して最大化</span>
@@ -407,6 +431,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
     <div id="tkrow">
       <div class="tcard">
         <div class="tname" style="color:var(--cyan)">● TANK-A <span class="dbdg" id="dbdgA" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="teb" id="tebA" style="color:var(--cyan)">EB: 70.0%</div>
         <div class="farr" id="inA">▼ IN</div>
         <div class="tbw"><div class="tsh">
           <div class="tofline"></div>
@@ -421,6 +446,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       </div>
       <div class="tcard">
         <div class="tname" style="color:var(--grn)">● TANK-B <span class="dbdg" id="dbdgB" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="teb" id="tebB" style="color:var(--grn)">EB: 70.0%</div>
         <div class="farr" id="inB">▼ IN</div>
         <div class="tbw"><div class="tsh">
           <div class="tofline"></div>
@@ -435,6 +461,7 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
       </div>
       <div class="tcard">
         <div class="tname" style="color:var(--org)">● TANK-C <span class="dbdg" id="dbdgC" style="display:none;font-size:11px;background:var(--pink);color:#fff;padding:2px 6px;border-radius:4px;margin-left:4px">精留</span></div>
+        <div class="teb" id="tebC" style="color:var(--org)">EB: 70.0%</div>
         <div class="farr" id="inC">▼ IN</div>
         <div class="tbw"><div class="tsh">
           <div class="tofline"></div>
@@ -581,17 +608,6 @@ function autoCalcSettings() {
     const tTrans = cVhold / targetF_vol;
     document.getElementById('tTrans').value = tTrans.toFixed(2);
   }
-  
-  const tStop = Number(document.getElementById('tStop').value)||0;
-  const cAdd = Number(document.getElementById('cAdd').value)||0;
-  const p1 = Number(document.getElementById('prod1').value)||150;
-  const rx1 = Number(document.getElementById('rx1').value)||50;
-  const F1 = (p1 * 1000 / 24) / (rx1 / 100);
-  if (F1 - cAdd > 0) {
-    const stopDur = 18900 / (F1 - cAdd);
-    const tSw = tStop + stopDur;
-    document.getElementById('tSw').value = tSw.toFixed(2);
-  }
 }
 
 function formatTime(baseTimeStr, hours) {
@@ -610,6 +626,20 @@ function calcFout_vol(F_kg, eb_feed, eb_re) {
   return (F_kg * Math.min(1.0, eb_feed / eb_re)) / C.DENSITY;
 }
 
+function getSchedActions() {
+  const rows = document.querySelectorAll('.srow');
+  const actions = [];
+  rows.forEach(row => {
+    const en = row.querySelector('.sen').checked;
+    const t = parseFloat(row.querySelector('.stime').value) || 0;
+    const act = row.querySelector('.sact').value;
+    const tk = row.querySelector('.stk').value;
+    if (en) actions.push({t, act, tk});
+  });
+  actions.sort((a,b) => a.t - b.t);
+  return actions;
+}
+
 function getParams() {
   const n  = id => parseFloat(document.getElementById(id).value) || 0;
   const s  = id => document.getElementById(id).value;
@@ -621,6 +651,7 @@ function getParams() {
   
   return {
     initA: n('initA'), initB: n('initB'), initC: n('initC'),
+    initEbA: n('initEbA'), initEbB: n('initEbB'), initEbC: n('initEbC'),
     P1: n('prod1'), EB1: n('eb1'), RX1: n('rx1'), EBre1: n('ebRe1'),
     P2: n('prod2'), EB2: n('eb2'), RX2: n('rx2'), EBre2: n('ebRe2'),
     cAdd:   n('cAdd'),
@@ -633,7 +664,8 @@ function getParams() {
     enFoutSw:    cb('enFoutSw'),tFoutSw:  n('tFoutSw'),tkNextFout: s('tkNextFout'),
     enDist:      cb('enDist'),  tDistStart: n('tDistStart'), tkDistIn: s('tkDistIn'), fDistIn: n('fDistIn'),
     tkDistOut:   s('tkDistOut'), fDistOut: n('fDistOut'),
-    baseTime:    s('baseTime')
+    baseTime:    s('baseTime'),
+    schedActions: getSchedActions()
   };
 }
 
@@ -657,30 +689,78 @@ function runSimulation(p) {
   if (p.tTrans > 0) F_shift = (Math.abs(deltaEB) / (p.EBre2 / 100)) / p.tTrans;
 
   let VA = clamp(p.initA), VB = clamp(p.initB), VC = clamp(p.initC);
+  let ebA = p.initEbA || 70, ebB = p.initEbB || 70, ebC = p.initEbC || 70;
   const steps = new Array(C.STEPS);
+
+  // Schedule action state
+  const sa = p.schedActions || [];
+  let schedFeedStopped = false;
+  let schedGradeSwitched = false;
+  let schedDistRunning = p.enDist;
+  let schedTkIn = p.tkOld;
+  let schedTkOut = p.tkOld;
+  let schedDistIn = p.tkDistIn;
+  let schedDistOut = p.tkDistOut;
+  let lastSchedIdx = 0;
 
   for (let i = 0; i < C.STEPS; i++) {
     const t = +(i * C.DT).toFixed(3);
-    const isRate2 = t >= p.Tsw - 1e-9;
+
+    // Apply schedule actions that fire at this time
+    for (let si = lastSchedIdx; si < sa.length; si++) {
+      if (sa[si].t > t + 1e-9) break;
+      lastSchedIdx = si + 1;
+      const a = sa[si];
+      switch (a.act) {
+        case 'fcIn':        schedTkIn = a.tk; break;
+        case 'fcOut':       schedTkOut = a.tk; break;
+        case 'distStart':   schedDistRunning = true; schedDistIn = a.tk; break;
+        case 'distStop':    schedDistRunning = false; break;
+        case 'distOutChg':  schedDistOut = a.tk; break;
+        case 'feedStop':    schedFeedStopped = true; break;
+        case 'feedResume':  schedFeedStopped = false; break;
+        case 'gradeSwitch': schedGradeSwitched = true; break;
+      }
+    }
+
+    const isRate2 = t >= p.Tsw - 1e-9 || schedGradeSwitched;
 
     let curEB = p.EB1;
     if (t >= p.Tsw) {
       if (t >= p.Tsw + p.tTrans) curEB = p.EB2;
       else curEB = p.EB1 + (p.EB2 - p.EB1) * (t - p.Tsw) / p.tTrans;
+    } else if (schedGradeSwitched) {
+      curEB = p.EB2;
     }
     const inTransition = t >= p.Tsw - 1e-9 && t <= p.Tsw + p.tTrans + 1e-9;
 
     const curFin_ideal  = isRate2 ? fin2  : fin1;
     const curFout_ideal = isRate2 ? fout2 : fout1;
+    const curEBre = isRate2 ? p.EBre2 : p.EBre1;
 
+    // Determine active IN tank
     let curTkIn = p.tkOld;
     if (!p.isRateMode && isRate2) curTkIn = p.tkNew;
     if (p.enTkSw && t >= p.tTkSw - 1e-9) curTkIn = p.tkNextIn;
+    // Schedule overrides
+    if (sa.length > 0) {
+      // Find the latest fcIn action that has fired
+      for (let si = 0; si < sa.length && sa[si].t <= t + 1e-9; si++) {
+        if (sa[si].act === 'fcIn') curTkIn = sa[si].tk;
+      }
+    }
 
+    // Determine active OUT tank
     let curTkOut = p.tkOld;
     const Vold = p.tkOld === 'A' ? VA : p.tkOld === 'B' ? VB : VC;
     if (!p.isRateMode && curTkIn !== p.tkOld && Vold <= C.EMPTY) curTkOut = p.tkNew;
     if (p.enFoutSw && t >= p.tFoutSw - 1e-9) curTkOut = p.tkNextFout;
+    // Schedule overrides
+    if (sa.length > 0) {
+      for (let si = 0; si < sa.length && sa[si].t <= t + 1e-9; si++) {
+        if (sa[si].act === 'fcOut') curTkOut = sa[si].tk;
+      }
+    }
 
     let FinA = 0, FinB = 0, FinC = 0, FoutA = 0, FoutB = 0, FoutC = 0;
     if      (curTkIn === 'A') FinA = curFin_ideal;
@@ -689,7 +769,10 @@ function runSimulation(p) {
 
     const curV_out = curTkOut === 'A' ? VA : curTkOut === 'B' ? VB : VC;
     let fout_actual = curFout_ideal;
+    // Original feed stop logic
     if (t >= p.tStop && t < p.Tsw) fout_actual = 0;
+    // Schedule feed stop override
+    if (schedFeedStopped) fout_actual = 0;
     if (curTkIn !== curTkOut) fout_actual = Math.min(fout_actual, curV_out / C.DT);
     if      (curTkOut === 'A') FoutA = fout_actual;
     else if (curTkOut === 'B') FoutB = fout_actual;
@@ -704,26 +787,49 @@ function runSimulation(p) {
         else if (curTkIn === 'B') FinB  += F_shift;
         else                       FinC  += F_shift;
       } else {
-        const sa = Math.min(F_shift, curV_out / C.DT);
-        if      (curTkOut === 'A') FoutA += sa;
-        else if (curTkOut === 'B') FoutB += sa;
-        else                        FoutC += sa;
+        const sAmt = Math.min(F_shift, curV_out / C.DT);
+        if      (curTkOut === 'A') FoutA += sAmt;
+        else if (curTkOut === 'B') FoutB += sAmt;
+        else                        FoutC += sAmt;
       }
     }
 
+    // Distillation - use schedule state
     let dFinA = 0, dFinB = 0, dFinC = 0, dFoutA = 0, dFoutB = 0, dFoutC = 0;
-    let distRunning = p.enDist && (t >= p.tDistStart);
+    let distRunning = false;
+    // Original dist logic
+    if (p.enDist && t >= p.tDistStart) distRunning = true;
+    // Schedule can start/stop dist
+    if (sa.length > 0) {
+      let dState = p.enDist && t >= p.tDistStart;
+      for (let si = 0; si < sa.length && sa[si].t <= t + 1e-9; si++) {
+        if (sa[si].act === 'distStart') { dState = true; schedDistIn = sa[si].tk; }
+        if (sa[si].act === 'distStop') dState = false;
+        if (sa[si].act === 'distOutChg') schedDistOut = sa[si].tk;
+      }
+      distRunning = dState;
+    }
+
+    let curDistIn = p.tkDistIn;
+    let curDistOut = p.tkDistOut;
+    if (sa.length > 0) {
+      for (let si = 0; si < sa.length && sa[si].t <= t + 1e-9; si++) {
+        if (sa[si].act === 'distStart') curDistIn = sa[si].tk;
+        if (sa[si].act === 'distOutChg') curDistOut = sa[si].tk;
+      }
+    }
+
     if (distRunning) {
-      const vDistTarget = p.tkDistIn === 'A' ? VA : p.tkDistIn === 'B' ? VB : VC;
+      const vDistTarget = curDistIn === 'A' ? VA : curDistIn === 'B' ? VB : VC;
       let actualDistOut = distIn_vol;
       if (vDistTarget <= C.EMPTY) actualDistOut = 0;
       
-      if      (p.tkDistIn === 'A') dFoutA = actualDistOut;
-      else if (p.tkDistIn === 'B') dFoutB = actualDistOut;
+      if      (curDistIn === 'A') dFoutA = actualDistOut;
+      else if (curDistIn === 'B') dFoutB = actualDistOut;
       else                         dFoutC = actualDistOut;
 
-      if      (p.tkDistOut === 'A') dFinA = distOut_vol;
-      else if (p.tkDistOut === 'B') dFinB = distOut_vol;
+      if      (curDistOut === 'A') dFinA = distOut_vol;
+      else if (curDistOut === 'B') dFinB = distOut_vol;
       else                          dFinC = distOut_vol;
     }
 
@@ -735,16 +841,43 @@ function runSimulation(p) {
 
     steps[i] = {
       t, phase, VA, VB, VC, FinA, FinB, FinC, FoutA, FoutB, FoutC,
+      ebA, ebB, ebC,
       holdEB: C.V_HOLD * (curEB / 100), holdST: C.V_HOLD * (1 - curEB / 100), activeEB: curEB,
       ofA: VA >= C.V_MAX, ofB: VB >= C.V_MAX, ofC: VC >= C.V_MAX,
       isRateMode: p.isRateMode, isRate2, isFshiftApplied, isShiftIn,
-      distActive: distRunning, distTkIn: distRunning ? p.tkDistIn : null, distTkOut: distRunning ? p.tkDistOut : null
+      distActive: distRunning, distTkIn: distRunning ? curDistIn : null, distTkOut: distRunning ? curDistOut : null
     };
 
     if (i < C.STEPS - 1) {
-      VA = clamp(VA + (FinA - FoutA) * C.DT);
-      VB = clamp(VB + (FinB - FoutB) * C.DT);
-      VC = clamp(VC + (FinC - FoutC) * C.DT);
+      // Calculate new volumes
+      const newVA = clamp(VA + (FinA - FoutA) * C.DT);
+      const newVB = clamp(VB + (FinB - FoutB) * C.DT);
+      const newVC = clamp(VC + (FinC - FoutC) * C.DT);
+
+      // EB concentration mixing calculation
+      // For each tank: new_eb = (old_vol * old_eb + in_vol * in_eb) / new_vol
+      // IN from process has curEBre concentration
+      // IN from distillation - assume same EB% as source (simplified)
+      if (newVA > C.EMPTY) {
+        const inEB_A = (FinA - dFinA) * C.DT * curEBre + dFinA * C.DT * (curDistOut === 'A' && distRunning ? (curDistIn === 'A' ? ebA : curDistIn === 'B' ? ebB : ebC) : 0);
+        const remainEB_A = Math.max(0, VA - FoutA * C.DT) * ebA;
+        ebA = (remainEB_A + inEB_A) / (newVA > 0 ? newVA : 1);
+        ebA = Math.max(0, Math.min(100, ebA));
+      }
+      if (newVB > C.EMPTY) {
+        const inEB_B = (FinB - dFinB) * C.DT * curEBre + dFinB * C.DT * (curDistOut === 'B' && distRunning ? (curDistIn === 'A' ? ebA : curDistIn === 'B' ? ebB : ebC) : 0);
+        const remainEB_B = Math.max(0, VB - FoutB * C.DT) * ebB;
+        ebB = (remainEB_B + inEB_B) / (newVB > 0 ? newVB : 1);
+        ebB = Math.max(0, Math.min(100, ebB));
+      }
+      if (newVC > C.EMPTY) {
+        const inEB_C = (FinC - dFinC) * C.DT * curEBre + dFinC * C.DT * (curDistOut === 'C' && distRunning ? (curDistIn === 'A' ? ebA : curDistIn === 'B' ? ebB : ebC) : 0);
+        const remainEB_C = Math.max(0, VC - FoutC * C.DT) * ebC;
+        ebC = (remainEB_C + inEB_C) / (newVC > 0 ? newVC : 1);
+        ebC = Math.max(0, Math.min(100, ebC));
+      }
+
+      VA = newVA; VB = newVB; VC = newVC;
     }
   }
   return steps;
@@ -864,6 +997,11 @@ function renderStep(idx) {
   updateTank('A',s.VA,s.FinA,s.FoutA,s.isFshiftApplied,s.isShiftIn);
   updateTank('B',s.VB,s.FinB,s.FoutB,s.isFshiftApplied,s.isShiftIn);
   updateTank('C',s.VC,s.FinC,s.FoutC,s.isFshiftApplied,s.isShiftIn);
+
+  // Tank EB% display
+  document.getElementById('tebA').textContent = `EB: ${s.ebA.toFixed(1)}%`;
+  document.getElementById('tebB').textContent = `EB: ${s.ebB.toFixed(1)}%`;
+  document.getElementById('tebC').textContent = `EB: ${s.ebC.toFixed(1)}%`;
 
   // 精留バッジ
   ['A','B','C'].forEach(tk => {
@@ -1078,9 +1216,9 @@ function autoCalcEBre2() {
 }
 
 // 全入力フィールドへのリスナー
-['initA','initB','initC','prod1','rx1','eb1','ebRe1','prod2','rx2','eb2','ebRe2',
+['initA','initB','initC','initEbA','initEbB','initEbC','prod1','rx1','eb1','ebRe1','prod2','rx2','eb2','ebRe2',
  'tSw','tTrans','tkOld','tkNew','modeRate', 'tDistStart', 'fDistIn', 'fDistOut', 'tkDistIn', 'tkDistOut',
- 'cDensity', 'cVmax', 'cVhold', 'cAdd', 'tStop', 'baseTime']
+ 'cDensity', 'cVmax', 'cVhold', 'cAdd', 'tStop', 'baseTime', 'enFeedStop', 'enTsw']
   .forEach(id=>{
     const el=document.getElementById(id);
     if(!el) return;
@@ -1091,6 +1229,52 @@ function autoCalcEBre2() {
     el.addEventListener('input',handler);
     el.addEventListener('change',handler);
   });
+
+// スケジュール管理
+let schedCounter = 0;
+function addSchedRow() {
+  const row = document.createElement('div');
+  row.className = 'srow';
+  row.innerHTML = `
+    <input type="checkbox" class="sen" checked>
+    <input type="number" class="stime" value="0" min="0" max="24" step="0.1" placeholder="h">
+    <span style="font-size:14px;color:var(--txt2)">h</span>
+    <select class="sact">
+      <option value="fcIn">FC受入タンク変更</option>
+      <option value="fcOut">払出タンク変更</option>
+      <option value="distStart">精留仕込み開始</option>
+      <option value="distStop">精留仕込み停止</option>
+      <option value="distOutChg">精留受入先変更</option>
+      <option value="feedStop">Re液フィード停止</option>
+      <option value="feedResume">Re液フィード再開</option>
+      <option value="gradeSwitch">FC切替(グレード変更)</option>
+    </select>
+    <span style="font-size:14px;color:var(--txt2)">→</span>
+    <select class="stk">
+      <option value="A">Tank A</option>
+      <option value="B">Tank B</option>
+      <option value="C">Tank C</option>
+    </select>
+    <button class="sdel" title="削除">✕</button>
+  `;
+  row.querySelector('.sdel').addEventListener('click', () => { row.remove(); recalc(); });
+  row.querySelector('.sen').addEventListener('change', recalc);
+  row.querySelector('.stime').addEventListener('input', recalc);
+  row.querySelector('.sact').addEventListener('change', recalc);
+  row.querySelector('.stk').addEventListener('change', recalc);
+  document.getElementById('schedRows').appendChild(row);
+}
+document.getElementById('addSched').addEventListener('click', () => { addSchedRow(); recalc(); });
+
+// タイムジャンプ
+document.getElementById('tJump').addEventListener('input', e => {
+  const h = parseFloat(e.target.value) || 0;
+  const step = Math.round(h / C.DT);
+  const clamped = Math.max(0, Math.min(C.STEPS - 1, step));
+  if (playTimer) { clearInterval(playTimer); playTimer = null; document.getElementById('bplay').textContent = '▶'; }
+  curStep = clamped;
+  renderStep(curStep);
+});
 
 recalc();
 </script>
